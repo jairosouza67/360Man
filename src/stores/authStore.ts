@@ -233,9 +233,20 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   updateProfile: async (data) => {
     const { user, profile } = get();
-    if (!user || !profile) return;
+    if (!user) throw new Error('User not authenticated');
     const docRef = doc(db, 'profiles', user.id);
-    await updateDoc(docRef, { ...data, updatedAt: new Date().toISOString() });
+    const timestamp = new Date().toISOString();
+
+    // If no profile is present locally, create/merge the profile document
+    if (!profile) {
+      const newProfile = { id: user.id, userId: user.id, ...data, updatedAt: timestamp } as Profile;
+      await setDoc(docRef, newProfile, { merge: true });
+      set({ profile: newProfile });
+      return;
+    }
+
+    // Otherwise update existing profile document
+    await updateDoc(docRef, { ...data, updatedAt: timestamp });
     set({ profile: { ...profile, ...data } });
   },
 
