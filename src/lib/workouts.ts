@@ -61,18 +61,61 @@ export const EXERCISE_TRANSLATIONS: Record<string, string> = {
     "Prancha Abdominal": "Plank"
 };
 
-// IDs específicos para carregamento instantâneo (Otimização)
+// IDs REAIS do canal DeltaBolic para garantir carregamento
 export const DELTABOLIC_VIDEO_MAP: Record<string, string> = {
+    // Peito
     "Supino Reto com Halteres": "VmB1G1K7v94",
-    "Supino Inclinado com Halteres": "0G2_Hj5qj8E",
-    "Elevação Lateral": "3VcKaXpzqRo",
-    "Tríceps Corda": "6yHuuyj-Ex0",
+    "Supino Inclinado com Halteres": "8iPEnn-ltC8",
+    "Supino Reto": "rT7DgCr-3pg", 
+    "Supino Inclinado": "SrqOu55lrYU",
+    "Crucifixo Reto": "eozdVDA78K0",
+    "Crucifixo na Polia": "Iwe6AmxVf7o",
+    "Crossover Polia Alta": "taI4XduLpTk",
+    "Flexão de Braço": "IODxDxX7oi4",
+
+    // Costas
     "Puxada Alta": "CAwf7n6Luuc",
-    "Remada Curvada": "G8x-_ac_keo",
-    "Agachamento Livre": "UltWZb7TIx8",
-    "Leg Press": "IZxyjW7MPJQ",
+    "Puxada Alta Frente": "CAwf7n6Luuc",
+    "Remada Curvada": "6FZHJGzMFEc",
+    "Remada Unilateral (Serrote)": "pYcpY20QaE8",
+    "Barra Fixa": "eGo4IYlbE5g",
+    "Pulldown": "JGeRYez5zen",
+    
+    // Ombros
+    "Desenvolvimento Militar": "QAQ64hK4Xxs",
+    "Desenvolvimento com Halteres": "qEwKCR5JCog",
+    "Elevação Lateral": "3VcKaXpzqRo",
+    "Elevação Frontal": "-t7fuZ0KRCY",
+    "Face Pull": "V8dZqdIdeCc",
+    "Encolhimento com Halteres": "g6qqin4skUA",
+    "Crucifixo Inverso": "n1e412yqPWA", // Reverse Pec Deck
+
+    // Braços
+    "Tríceps Corda": "6yHuuyj-Ex0",
+    "Tríceps Testa": "d_KZxkY_0cM",
+    "Tríceps Pulley": "2-LAMcpzODU",
     "Rosca Direta": "i1xrPS-lEkI",
-    "Desenvolvimento Militar": "QAQ64hK4Xxs"
+    "Rosca Direta Halteres": "sAq_ocpRh_I",
+    "Rosca Martelo": "zC3nLlEpq4w",
+    "Rosca Scott": "fIWP8RFNCN8",
+
+    // Pernas
+    "Agachamento Livre": "UltWZb7TIx8",
+    "Agachamento Goblet": "MeIiIdhvXT4",
+    "Leg Press": "IZxyjW7MPJQ",
+    "Leg Press 45": "IZxyjW7MPJQ",
+    "Cadeira Extensora": "YyvSfVjQeL0",
+    "Mesa Flexora": "ELOCsoDSmrg",
+    "Afundo com Halteres": "D7KaRcUTQeE",
+    "Levantamento Terra": "op9kVnSso6Q",
+    "Stiff": "1Tq3QdYUuHs",
+    "Stiff com Halteres": "1Tq3QdYUuHs", // Usando similar
+    "Panturrilha Sentado": "JbyjNymZOt0",
+    "Panturrilha em Pé": "ymkhMbO-u6k",
+
+    // Abdomen
+    "Abdominal Supra": "Xyd_fa5zoEU",
+    "Prancha Abdominal": "pSHjTRVQxqk"
 };
 
 export const WORKOUT_DATABASE: Record<string, Record<string, WorkoutPlan>> = {
@@ -88,9 +131,9 @@ export const WORKOUT_DATABASE: Record<string, Record<string, WorkoutPlan>> = {
                 {
                     dayName: "Treino A - Superiores",
                     exercises: [
-                        { name: "Supino Reto Máquina", sets: 3, reps: "12-15", rest: "60s" },
+                        { name: "Supino Reto com Halteres", sets: 3, reps: "12-15", rest: "60s" },
                         { name: "Puxada Alta Frente", sets: 3, reps: "12-15", rest: "60s" },
-                        { name: "Desenvolvimento Máquina", sets: 3, reps: "12-15", rest: "60s" },
+                        { name: "Desenvolvimento com Halteres", sets: 3, reps: "12-15", rest: "60s" },
                         { name: "Rosca Direta Halteres", sets: 3, reps: "12-15", rest: "60s" },
                         { name: "Tríceps Pulley", sets: 3, reps: "12-15", rest: "60s" },
                         { name: "Abdominal Supra", sets: 3, reps: "15-20", rest: "45s" }
@@ -210,7 +253,7 @@ export const WORKOUT_DATABASE: Record<string, Record<string, WorkoutPlan>> = {
                     dayName: "A - Peito",
                     exercises: [
                         { name: "Supino Inclinado com Halteres", sets: 4, reps: "8-10", rest: "90s" },
-                        { name: "Supino Reto Máquina", sets: 4, reps: "10-12", rest: "60s" },
+                        { name: "Supino Reto com Halteres", sets: 4, reps: "10-12", rest: "60s" },
                         { name: "Crucifixo Reto", sets: 3, reps: "12-15", rest: "60s" },
                         { name: "Crossover Polia Alta", sets: 3, reps: "15", rest: "45s", technique: "Drop-set" }
                     ]
@@ -219,7 +262,7 @@ export const WORKOUT_DATABASE: Record<string, Record<string, WorkoutPlan>> = {
                     dayName: "B - Costas",
                     exercises: [
                         { name: "Barra Fixa", sets: 4, reps: "Falha", rest: "90s" },
-                        { name: "Remada Curvada Pegada Supinada", sets: 4, reps: "8-10", rest: "90s" },
+                        { name: "Remada Curvada", sets: 4, reps: "8-10", rest: "90s" },
                         { name: "Remada Unilateral (Serrote)", sets: 3, reps: "10-12", rest: "60s" },
                         { name: "Puxada Triângulo", sets: 3, reps: "12", rest: "60s" },
                         { name: "Hiperextensão Lombar", sets: 3, reps: "15", rest: "60s" }
