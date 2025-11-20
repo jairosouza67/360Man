@@ -1,16 +1,16 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
     // Helper functions
     function isAuthenticated() {
       return request.auth != null;
     }
-    
+
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
-    
+
     function isAdmin() {
       // Replace with actual admin check (e.g., custom claim or specific UID)
       return isAuthenticated() && request.auth.token.email == 'admin@respectpill.com';
@@ -63,7 +63,7 @@ service cloud.firestore {
       allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
     }
-    
+
     // Reports/Feedback
     match /reports/{reportId} {
       allow create: if isAuthenticated();
