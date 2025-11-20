@@ -237,17 +237,25 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     const docRef = doc(db, 'profiles', user.id);
     const timestamp = new Date().toISOString();
 
+    // Remove undefined fields because Firestore does not accept undefined values
+    const cleanedData: Partial<Profile> = {};
+    Object.entries(data || {}).forEach(([key, value]) => {
+      if (value !== undefined) (cleanedData as any)[key] = value;
+    });
+
+    const finalData: any = { ...cleanedData, updatedAt: timestamp };
+
     // If no profile is present locally, create/merge the profile document
     if (!profile) {
-      const newProfile = { id: user.id, userId: user.id, ...data, updatedAt: timestamp } as Profile;
+      const newProfile = { id: user.id, userId: user.id, ...finalData } as Profile;
       await setDoc(docRef, newProfile, { merge: true });
       set({ profile: newProfile });
       return;
     }
 
     // Otherwise update existing profile document
-    await updateDoc(docRef, { ...data, updatedAt: timestamp });
-    set({ profile: { ...profile, ...data } });
+    await updateDoc(docRef, finalData);
+    set({ profile: { ...profile, ...cleanedData } });
   },
 
   uploadAvatar: async (file: File) => {
