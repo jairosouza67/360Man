@@ -7,7 +7,6 @@
  * - Type-safe interfaces
  */
 
-const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'http://localhost:3000';
 const SITE_NAME = 'Respect Pill';
 
@@ -158,6 +157,26 @@ function cleanAndParseJSON(content: string): any {
 // --- Core Function ---
 
 async function callOpenRouter(systemPrompt: string, userPrompt: string): Promise<any> {
+    // Try Netlify Function first (secure server-side)
+    try {
+        const response = await fetch('/.netlify/functions/openrouter', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ systemPrompt, userPrompt }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return cleanAndParseJSON(data.content);
+        }
+    } catch (error) {
+        console.warn('Netlify Function failed, falling back to client-side call:', error);
+    }
+
+    // Fallback to client-side call (less secure but works)
+    const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
     if (!OPENROUTER_API_KEY) {
         console.warn("VITE_OPENROUTER_API_KEY não encontrada. Usando Mock Data.");
         await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
