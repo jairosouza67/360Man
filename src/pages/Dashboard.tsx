@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import { useTrackerStore } from '../stores/trackerStore';
 import { Link } from 'react-router-dom';
@@ -18,6 +18,8 @@ export default function Dashboard() {
     }
   }, [user, loadTrackers, loadPlans]);
 
+  const [streaks, setStreaks] = useState({ workout: 0, reading: 0, sleep: 0 });
+
   const today = new Date();
   const weekStart = startOfWeek(today, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(today, { weekStartsOn: 1 });
@@ -30,17 +32,32 @@ export default function Dashboard() {
   const completedToday = todayTrackers.filter(t => t.value?.completed).length;
   const totalToday = todayTrackers.length;
 
-  const streaks = {
-    workout: 0,
-    reading: 0,
-    sleep: 0
-  };
+  useEffect(() => {
+    let mounted = true;
 
-  if (user) {
-    getStreak(user.id, 'workout').then(s => streaks.workout = s);
-    getStreak(user.id, 'reading').then(s => streaks.reading = s);
-    getStreak(user.id, 'sleep').then(s => streaks.sleep = s);
-  }
+    async function fetchStreaks() {
+      if (!user) {
+        if (mounted) setStreaks({ workout: 0, reading: 0, sleep: 0 });
+        return;
+      }
+
+      try {
+        const [w, r, s] = await Promise.all([
+          getStreak(user.id, 'workout'),
+          getStreak(user.id, 'reading'),
+          getStreak(user.id, 'sleep')
+        ]);
+
+        if (mounted) setStreaks({ workout: w, reading: r, sleep: s });
+      } catch (e) {
+        console.error('Error fetching streaks', e);
+      }
+    }
+
+    fetchStreaks();
+
+    return () => { mounted = false; };
+  }, [user, getStreak]);
 
   const getPillarProgress = (pillar: string) => {
     const pillarTrackers = trackers.filter(t => t.type === pillar);

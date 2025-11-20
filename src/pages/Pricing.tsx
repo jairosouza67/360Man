@@ -4,7 +4,8 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 import { CreditCard, CheckCircle2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-const stripePromise = loadStripe(((import.meta as any).env.VITE_STRIPE_PUBLISHABLE_KEY as string) || '');
+const stripeKey = ((import.meta as any).env.VITE_STRIPE_PUBLISHABLE_KEY as string) || '';
+const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 interface SubscriptionPlan {
   id: string;

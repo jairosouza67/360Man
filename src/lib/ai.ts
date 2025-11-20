@@ -12,7 +12,7 @@ const SITE_URL = import.meta.env.VITE_SITE_URL || 'http://localhost:3000';
 const SITE_NAME = 'Respect Pill';
 
 // Modelo gratuito e rápido para testes via OpenRouter
-const AI_MODEL = "google/gemini-2.0-flash-lite-preview-02-05:free"; 
+const AI_MODEL = "google/gemini-2.0-flash-lite-preview-02-05:free";
 
 // --- Interfaces ---
 
@@ -191,7 +191,7 @@ async function callOpenRouter(systemPrompt: string, userPrompt: string): Promise
 
         const data = await response.json();
         const content = data.choices?.[0]?.message?.content;
-        
+
         if (!content) return null;
 
         return cleanAndParseJSON(content);
@@ -221,7 +221,7 @@ export async function generateDietPlan(weight: string, height: string, goal: str
     const userPrompt = `Perfil: ${weight}kg, ${height}cm. Objetivo: ${goal}. Refeições/dia: ${meals}. Preferências: ${preferences}`;
 
     const data = await callOpenRouter(systemPrompt, userPrompt);
-    
+
     if (!data) return getMockDietPlan(goal);
 
     return { id: Date.now().toString(), createdAt: new Date().toISOString(), ...data };
@@ -311,13 +311,13 @@ export async function analyzeThought(situation: string, thought: string): Promis
     return data;
 }
 
-export async function findExerciseVideo(exerciseName: string): Promise<string | null> {
+export async function findExerciseVideo(_exerciseName: string): Promise<string | null> {
     // Mock implementation since we don't have YouTube API key
     // Returning null triggers the manual search fallback in the UI, which is safer/better UX than a broken video
     return null;
 }
 
 // Placeholder for legacy function support if needed
-export async function generate90DayPlan(profile: any) {
+export async function generate90DayPlan(_profile: any) {
     return [];
 }

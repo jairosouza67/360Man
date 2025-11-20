@@ -36,7 +36,7 @@ const areas = [
 ];
 
 export default function Layout() {
-  const { user, logout } = useAuthStore();
+  const { user, profile, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -74,11 +74,42 @@ export default function Layout() {
             <div className="flex items-center space-x-2 sm:space-x-4">
               <div className="relative group">
                 <button className="flex items-center space-x-1 sm:space-x-2 text-zinc-300 hover:text-white px-3 py-2 rounded-lg transition-all hover:bg-white/5">
-                  <User className="h-4 w-4" />
-                  <span className="hidden sm:inline text-sm font-medium">{user?.name || 'Usuário'}</span>
+                  {user?.avatar && user.avatar.trim() ? (
+                    <img
+                      src={user.avatar}
+                      alt={user?.name || 'Avatar'}
+                      className="h-7 w-7 rounded-full object-cover border border-white/10"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  ) : profile?.avatar && profile.avatar.trim() ? (
+                    <img
+                      src={profile.avatar}
+                      alt={profile?.name || 'Avatar'}
+                      className="h-7 w-7 rounded-full object-cover border border-white/10"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="h-7 w-7 rounded-full bg-primary-500/20 flex items-center justify-center border border-white/10">
+                      <span className="text-xs font-medium text-primary-400">
+                        {(user?.name || profile?.name || 'U')?.[0]?.toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <span className="hidden sm:inline text-sm font-medium">{user?.name || profile?.name || 'Usuário'}</span>
                 </button>
 
                 <div className="absolute right-0 mt-2 w-48 bg-dark-800 rounded-xl border border-white/10 shadow-2xl py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <Link
+                    to="/app/profile"
+                    className="flex items-center space-x-2 px-4 py-3 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition-colors rounded-lg mx-1"
+                  >
+                    <User className="h-4 w-4" />
+                    <span>Meu Perfil</span>
+                  </Link>
                   <Link
                     to="/app/settings"
                     className="flex items-center space-x-2 px-4 py-3 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition-colors rounded-lg mx-1"

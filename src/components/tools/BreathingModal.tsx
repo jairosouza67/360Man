@@ -93,21 +93,21 @@ export const BreathingModal = ({ onClose }: { onClose: () => void }) => {
 
     useEffect(() => {
         if (!isActive || isPaused) return;
-        
+
         if (timer === 0) {
             vibrate();
             const nextPhase = getNextPhase(phase);
             let duration = getDuration(nextPhase);
             let actualNextPhase = nextPhase;
-            
+
             if (duration === 0) {
-                 actualNextPhase = getNextPhase(nextPhase);
-                 duration = getDuration(actualNextPhase);
+                actualNextPhase = getNextPhase(nextPhase);
+                duration = getDuration(actualNextPhase);
             }
 
             setPhase(actualNextPhase);
             setTimer(duration);
-            
+
             const msgs = messages[actualNextPhase];
             if (msgs) setMessage(msgs[Math.floor(Math.random() * msgs.length)]);
 
@@ -117,7 +117,7 @@ export const BreathingModal = ({ onClose }: { onClose: () => void }) => {
         }
     }, [timer, isActive, isPaused, phase, rhythm]);
 
-    const getNextPhase = (p: string) => {
+    const getNextPhase = (p: string): 'inhale' | 'hold' | 'exhale' | 'holdEmpty' => {
         if (p === 'inhale') return 'hold';
         if (p === 'hold') return 'exhale';
         if (p === 'exhale') return 'holdEmpty';
@@ -133,7 +133,7 @@ export const BreathingModal = ({ onClose }: { onClose: () => void }) => {
 
     const getCircleStyle = () => {
         const base = "w-64 h-64 rounded-full border-4 flex items-center justify-center transition-all duration-[1000ms] ease-linear relative ";
-        
+
         if (!isActive) return base + "scale-100 bg-black border-dark-700";
         if (isPaused) return base + `scale-100 bg-dark-800 ${currentRhythm.circle} opacity-50`;
 
@@ -145,7 +145,7 @@ export const BreathingModal = ({ onClose }: { onClose: () => void }) => {
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-fade-in">
-             <div className="w-full max-w-md p-6 flex flex-col items-center relative h-full md:h-auto justify-center">
+            <div className="w-full max-w-md p-6 flex flex-col items-center relative h-full md:h-auto justify-center">
                 <div className="absolute top-6 left-6 md:top-0 md:left-0 w-full flex justify-between items-center z-20">
                     <button onClick={onClose} className="bg-transparent border border-white/10 flex items-center gap-2 text-zinc-400 hover:text-white transition-colors group px-4 py-2 rounded-full hover:bg-white/5">
                         <ArrowLeft className="w-4 h-4" />
@@ -158,11 +158,10 @@ export const BreathingModal = ({ onClose }: { onClose: () => void }) => {
                         <button
                             key={idx}
                             onClick={() => setRhythm(idx)}
-                            className={`px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-full border transition-all ${
-                                rhythm === idx 
-                                ? 'bg-white text-black border-white' 
-                                : 'bg-transparent text-zinc-500 border-white/10 hover:border-white/30 hover:text-white'
-                            }`}
+                            className={`px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-full border transition-all ${rhythm === idx
+                                    ? 'bg-white text-black border-white'
+                                    : 'bg-transparent text-zinc-500 border-white/10 hover:border-white/30 hover:text-white'
+                                }`}
                         >
                             {r.name.split(' ')[0]}
                         </button>
@@ -170,9 +169,8 @@ export const BreathingModal = ({ onClose }: { onClose: () => void }) => {
                 </div>
 
                 <div className="relative mb-8 cursor-pointer" onClick={isActive ? togglePause : startCycle}>
-                    <div className={`absolute inset-0 rounded-full blur-3xl opacity-20 transition-all duration-1000 ${
-                        isActive && !isPaused && (phase === 'inhale' || phase === 'hold') ? 'bg-white scale-125' : 'bg-transparent scale-90'
-                    }`}></div>
+                    <div className={`absolute inset-0 rounded-full blur-3xl opacity-20 transition-all duration-1000 ${isActive && !isPaused && (phase === 'inhale' || phase === 'hold') ? 'bg-white scale-125' : 'bg-transparent scale-90'
+                        }`}></div>
 
                     <div className={getCircleStyle()}>
                         <div className="text-center z-10">
@@ -207,7 +205,7 @@ export const BreathingModal = ({ onClose }: { onClose: () => void }) => {
                             {rhythms[rhythm].name}
                         </p>
                     </div>
-                    
+
                     <div className={`transition-all duration-1000 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                         <p className="text-sm font-medium text-cobalt-400 italic">
                             {affirmation}
@@ -216,26 +214,25 @@ export const BreathingModal = ({ onClose }: { onClose: () => void }) => {
                 </div>
 
                 <div className="flex items-center gap-6 mt-4">
-                    <button 
+                    <button
                         onClick={stopSession}
                         disabled={!isActive}
-                        className={`p-4 rounded-full border bg-transparent transition-all ${
-                            isActive 
-                            ? 'border-white/20 text-zinc-400 hover:bg-white/5 hover:text-white' 
-                            : 'border-white/5 text-zinc-700 cursor-not-allowed'
-                        }`}
+                        className={`p-4 rounded-full border bg-transparent transition-all ${isActive
+                                ? 'border-white/20 text-zinc-400 hover:bg-white/5 hover:text-white'
+                                : 'border-white/5 text-zinc-700 cursor-not-allowed'
+                            }`}
                     >
                         <Square className="w-5 h-5 fill-current" />
                     </button>
 
-                    <button 
+                    <button
                         onClick={isActive ? togglePause : startCycle}
                         className="p-6 rounded-full bg-white text-black hover:bg-zinc-200 hover:scale-105 transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)] border-0"
                     >
                         {!isActive || isPaused ? <Play className="w-6 h-6 ml-1 fill-current" /> : <Pause className="w-6 h-6 fill-current" />}
                     </button>
                 </div>
-             </div>
+            </div>
         </div>
     );
 };
