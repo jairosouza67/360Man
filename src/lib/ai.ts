@@ -8,7 +8,7 @@
  */
 
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'http://localhost:3000';
-const SITE_NAME = 'Respect Pill';
+const SITE_NAME = '360Man';
 
 // Modelo gratuito e rápido para testes via OpenRouter
 const AI_MODEL = "google/gemini-2.0-flash-lite-preview-02-05:free";

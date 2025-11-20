@@ -370,7 +370,7 @@ export default function PrivacySettings() {
                   onChange={(e) => setDeleteAccount(prev => ({ ...prev, reason: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   rows={3}
-                  placeholder="Por que está deixando o Respect Pill?"
+                  placeholder="Por que está deixando o 360Man?"
                 />
               </div>
 

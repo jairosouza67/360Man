@@ -216,7 +216,7 @@ export default function OnboardingWizard() {
       const now = new Date().toISOString();
       await addDoc(collection(db, 'plans'), {
         userId: completeData.email,
-        title: 'Plano de 90 Dias - Respect Pill',
+        title: 'Plano de 90 Dias - 360Man',
         description: 'Plano personalizado baseado em suas metas e perfil',
         duration: 90,
         pillars: completeData.goals.slice(0, 3),
@@ -230,7 +230,7 @@ export default function OnboardingWizard() {
         updatedAt: now
       });
 
-      toast.success('Bem-vindo ao Respect Pill! Seu plano de 90 dias foi criado.');
+      toast.success('Bem-vindo ao 360Man! Seu plano de 90 dias foi criado.');
       navigate('/app/dashboard');
 
     } catch (error) {

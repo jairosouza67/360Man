@@ -2,7 +2,7 @@ import type { Handler, HandlerEvent } from '@netlify/functions';
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const SITE_URL = process.env.SITE_URL || 'https://360man.netlify.app';
-const SITE_NAME = 'Respect Pill';
+const SITE_NAME = '360Man';
 const AI_MODEL = "google/gemini-2.0-flash-lite-preview-02-05:free";
 
 export const handler: Handler = async (event: HandlerEvent) => {
