@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTrackerStore } from '../stores/trackerStore';
 import { useAuthStore } from '../stores/authStore';
-import { User, Activity, Plus, CheckCircle, Calendar as CalendarIcon, ArrowUp } from 'lucide-react';
+import { User, Activity, Plus, CheckCircle, Calendar as CalendarIcon, ArrowUp, Edit2 } from 'lucide-react';
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -12,6 +12,7 @@ export default function Postura() {
 
   // Form states
   const [stretchingDuration, setStretchingDuration] = useState('');
+  const [isEditingStretching, setIsEditingStretching] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -50,6 +51,14 @@ export default function Postura() {
       timestamp: new Date().toISOString()
     });
     setStretchingDuration('');
+    setIsEditingStretching(false);
+  };
+
+  const handleEditStretching = () => {
+    if (postureTracker?.value?.stretchingDuration) {
+      setStretchingDuration(postureTracker.value.stretchingDuration.toString());
+      setIsEditingStretching(true);
+    }
   };
 
   // Weekly progress
@@ -78,8 +87,8 @@ export default function Postura() {
                 key={offset}
                 onClick={() => setSelectedDate(date)}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${isSelected
-                    ? 'bg-dark-700 text-white shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-300'
+                  ? 'bg-dark-700 text-white shadow-sm'
+                  : 'text-zinc-500 hover:text-zinc-300'
                   }`}
               >
                 {offset === 0 ? 'Hoje' : format(date, 'dd/MM')}
@@ -144,19 +153,19 @@ export default function Postura() {
           </div>
 
           <div className="p-6">
-            {(postureTracker?.value?.stretchingDuration || 0) > 0 ? (
+            {(postureTracker?.value?.stretchingDuration || 0) > 0 && !isEditingStretching ? (
               <div className="text-center py-8">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 mb-4">
                   <Activity className="h-8 w-8 text-emerald-500" />
                 </div>
                 <h3 className="text-white font-medium mb-1">{postureTracker?.value?.stretchingDuration} minutos</h3>
                 <p className="text-zinc-500">Flexibilidade trabalhada</p>
-
                 <button
-                  onClick={() => setStretchingDuration('')}
-                  className="mt-4 text-xs text-zinc-500 hover:text-white underline"
+                  onClick={handleEditStretching}
+                  className="mt-4 text-xs text-zinc-600 hover:text-zinc-400 transition-colors flex items-center justify-center gap-1 mx-auto"
                 >
-                  Atualizar
+                  <Edit2 className="h-3 w-3" />
+                  <span>Editar</span>
                 </button>
               </div>
             ) : (
@@ -209,8 +218,8 @@ export default function Postura() {
                   {format(day, 'EEE', { locale: ptBR }).slice(0, 3)}
                 </span>
                 <div className={`w-full aspect-square rounded-lg flex items-center justify-center border transition-all ${hasActivity
-                    ? 'bg-amber-500/20 border-amber-500/50 text-amber-400'
-                    : 'bg-dark-900 border-white/5 text-zinc-700'
+                  ? 'bg-amber-500/20 border-amber-500/50 text-amber-400'
+                  : 'bg-dark-900 border-white/5 text-zinc-700'
                   }`}>
                   {hasActivity && <User className="h-4 w-4" />}
                 </div>

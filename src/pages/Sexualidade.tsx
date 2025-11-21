@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTrackerStore } from '../stores/trackerStore';
 import { useAuthStore } from '../stores/authStore';
-import { Flame, Zap, Plus, CheckCircle, Calendar as CalendarIcon } from 'lucide-react';
+import { Flame, Zap, Plus, CheckCircle, Calendar as CalendarIcon, Edit2 } from 'lucide-react';
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -12,6 +12,7 @@ export default function Sexualidade() {
 
   // Form states
   const [practiceType, setPracticeType] = useState('');
+  const [isEditingPractice, setIsEditingPractice] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -49,6 +50,14 @@ export default function Sexualidade() {
       timestamp: new Date().toISOString()
     });
     setPracticeType('');
+    setIsEditingPractice(false);
+  };
+
+  const handleEditPractice = () => {
+    if (sexualityTracker?.value?.practice) {
+      setPracticeType(sexualityTracker.value.practice);
+      setIsEditingPractice(true);
+    }
   };
 
   // Weekly progress
@@ -77,8 +86,8 @@ export default function Sexualidade() {
                 key={offset}
                 onClick={() => setSelectedDate(date)}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${isSelected
-                    ? 'bg-dark-700 text-white shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-300'
+                  ? 'bg-dark-700 text-white shadow-sm'
+                  : 'text-zinc-500 hover:text-zinc-300'
                   }`}
               >
                 {offset === 0 ? 'Hoje' : format(date, 'dd/MM')}
@@ -119,8 +128,8 @@ export default function Sexualidade() {
                     key={num}
                     onClick={() => handleSaveEnergy(num)}
                     className={`aspect-square rounded-lg font-medium transition-all ${isSelected
-                        ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
-                        : 'bg-dark-900 text-zinc-500 hover:bg-dark-800 hover:text-purple-400'
+                      ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
+                      : 'bg-dark-900 text-zinc-500 hover:bg-dark-800 hover:text-purple-400'
                       }`}
                   >
                     {num}
@@ -146,13 +155,20 @@ export default function Sexualidade() {
           </div>
 
           <div className="p-6">
-            {sexualityTracker?.value?.practice ? (
+            {sexualityTracker?.value?.practice && !isEditingPractice ? (
               <div className="text-center py-8">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-500/10 mb-4">
                   <Flame className="h-8 w-8 text-red-500" />
                 </div>
                 <h3 className="text-white font-medium mb-1">Prática Registrada</h3>
                 <p className="text-zinc-500">{sexualityTracker.value.practice}</p>
+                <button
+                  onClick={handleEditPractice}
+                  className="mt-4 text-xs text-zinc-600 hover:text-zinc-400 transition-colors flex items-center justify-center gap-1 mx-auto"
+                >
+                  <Edit2 className="h-3 w-3" />
+                  <span>Editar</span>
+                </button>
               </div>
             ) : (
               <div className="space-y-4">
@@ -209,8 +225,8 @@ export default function Sexualidade() {
                   {format(day, 'EEE', { locale: ptBR }).slice(0, 3)}
                 </span>
                 <div className={`w-full aspect-square rounded-lg flex items-center justify-center border transition-all ${hasActivity
-                    ? 'bg-purple-500/20 border-purple-500/50 text-purple-400'
-                    : 'bg-dark-900 border-white/5 text-zinc-700'
+                  ? 'bg-purple-500/20 border-purple-500/50 text-purple-400'
+                  : 'bg-dark-900 border-white/5 text-zinc-700'
                   }`}>
                   {hasActivity && <Zap className="h-4 w-4" />}
                 </div>

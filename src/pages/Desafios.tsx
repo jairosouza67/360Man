@@ -1,9 +1,19 @@
 import { useState } from 'react';
-import { Trophy, Medal, Calendar, CheckCircle, ArrowUp } from 'lucide-react';
+import { Trophy, Medal, Calendar, CheckCircle, ArrowUp, Settings, Plus, X } from 'lucide-react';
 import { differenceInDays, addDays } from 'date-fns';
 
 export default function Desafios() {
     const [activeTab, setActiveTab] = useState<'active' | 'leaderboard'>('active');
+    const [isEditingTasks, setIsEditingTasks] = useState(false);
+    const [newTaskTitle, setNewTaskTitle] = useState('');
+
+    // Editable tasks state
+    const [tasks, setTasks] = useState([
+        { id: 1, title: "Banho Gelado (3min)", completed: true },
+        { id: 2, title: "Sem Açúcar", completed: true },
+        { id: 3, title: "Leitura (20 pág)", completed: false },
+        { id: 4, title: "Treino de Força", completed: false },
+    ]);
 
     // Mock data for now
     const currentChallenge = {
@@ -14,12 +24,27 @@ export default function Desafios() {
         participants: 1240,
         myProgress: 12, // days
         totalDays: 30,
-        tasks: [
-            { id: 1, title: "Banho Gelado (3min)", completed: true },
-            { id: 2, title: "Sem Açúcar", completed: true },
-            { id: 3, title: "Leitura (20 pág)", completed: false },
-            { id: 4, title: "Treino de Força", completed: false },
-        ]
+    };
+
+    const toggleTaskCompletion = (taskId: number) => {
+        setTasks(tasks.map(task =>
+            task.id === taskId ? { ...task, completed: !task.completed } : task
+        ));
+    };
+
+    const addTask = () => {
+        if (!newTaskTitle.trim()) return;
+        const newTask = {
+            id: Math.max(...tasks.map(t => t.id), 0) + 1,
+            title: newTaskTitle,
+            completed: false
+        };
+        setTasks([...tasks, newTask]);
+        setNewTaskTitle('');
+    };
+
+    const removeTask = (taskId: number) => {
+        setTasks(tasks.filter(task => task.id !== taskId));
     };
 
     const leaderboard = [
@@ -32,6 +57,7 @@ export default function Desafios() {
 
     const daysLeft = differenceInDays(currentChallenge.endDate, new Date());
     const progressPercent = Math.round((currentChallenge.myProgress / currentChallenge.totalDays) * 100);
+    const completedTasks = tasks.filter(t => t.completed).length;
 
     return (
         <div className="space-y-8">
@@ -77,14 +103,26 @@ export default function Desafios() {
                             </div>
 
                             <div className="p-8 relative z-10">
-                                <div className="flex items-center space-x-3 mb-4">
-                                    <div className="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400 text-xs font-bold uppercase tracking-wider border border-yellow-500/20">
-                                        Mensal
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400 text-xs font-bold uppercase tracking-wider border border-yellow-500/20">
+                                            Mensal
+                                        </div>
+                                        <div className="flex items-center text-zinc-400 text-sm">
+                                            <Calendar className="h-4 w-4 mr-1" />
+                                            <span>Termina em {daysLeft} dias</span>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center text-zinc-400 text-sm">
-                                        <Calendar className="h-4 w-4 mr-1" />
-                                        <span>Termina em {daysLeft} dias</span>
-                                    </div>
+                                    <button
+                                        onClick={() => setIsEditingTasks(!isEditingTasks)}
+                                        className={`p-2 rounded-lg transition-colors ${isEditingTasks
+                                                ? 'bg-yellow-500/20 text-yellow-400'
+                                                : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
+                                            }`}
+                                        title="Personalizar desafios"
+                                    >
+                                        <Settings className="h-4 w-4" />
+                                    </button>
                                 </div>
 
                                 <h2 className="text-3xl font-bold text-white mb-4">{currentChallenge.title}</h2>
@@ -109,20 +147,70 @@ export default function Desafios() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {currentChallenge.tasks.map(task => (
-                                        <div key={task.id} className={`p-4 rounded-xl border transition-all flex items-center justify-between ${task.completed
-                                            ? 'bg-yellow-500/10 border-yellow-500/30 text-white'
-                                            : 'bg-dark-900 border-white/5 text-zinc-400'
-                                            }`}>
-                                            <span className="font-medium">{task.title}</span>
-                                            {task.completed ? (
-                                                <CheckCircle className="h-5 w-5 text-yellow-500" />
-                                            ) : (
-                                                <div className="h-5 w-5 rounded-full border-2 border-zinc-600" />
-                                            )}
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-sm font-medium text-zinc-400 uppercase tracking-wider">Tarefas Diárias ({completedTasks}/{tasks.length})</h3>
+                                        {isEditingTasks && (
+                                            <span className="text-xs text-yellow-400">Modo de Edição</span>
+                                        )}
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {tasks.map(task => (
+                                            <div
+                                                key={task.id}
+                                                className={`p-4 rounded-xl border transition-all flex items-center justify-between group ${task.completed
+                                                        ? 'bg-yellow-500/10 border-yellow-500/30 text-white'
+                                                        : 'bg-dark-900 border-white/5 text-zinc-400 hover:border-white/10'
+                                                    }`}
+                                            >
+                                                <span className="font-medium flex-1">{task.title}</span>
+                                                <div className="flex items-center gap-2">
+                                                    {isEditingTasks && (
+                                                        <button
+                                                            onClick={() => removeTask(task.id)}
+                                                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 rounded transition-all"
+                                                            title="Remover tarefa"
+                                                        >
+                                                            <X className="h-3 w-3 text-red-400" />
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => toggleTaskCompletion(task.id)}
+                                                        className="flex items-center justify-center"
+                                                        disabled={isEditingTasks}
+                                                    >
+                                                        {task.completed ? (
+                                                            <CheckCircle className="h-5 w-5 text-yellow-500" />
+                                                        ) : (
+                                                            <div className="h-5 w-5 rounded-full border-2 border-zinc-600 hover:border-zinc-500 transition-colors" />
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {isEditingTasks && (
+                                        <div className="flex gap-2 pt-2">
+                                            <input
+                                                type="text"
+                                                value={newTaskTitle}
+                                                onChange={(e) => setNewTaskTitle(e.target.value)}
+                                                onKeyPress={(e) => e.key === 'Enter' && addTask()}
+                                                placeholder="Nova tarefa..."
+                                                className="flex-1 bg-dark-900 border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder:text-zinc-600 focus:ring-1 focus:ring-yellow-500/50 focus:border-yellow-500/50 outline-none transition-all"
+                                            />
+                                            <button
+                                                onClick={addTask}
+                                                disabled={!newTaskTitle.trim()}
+                                                className="px-4 py-2 bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all flex items-center gap-2"
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                                <span className="text-sm font-medium">Adicionar</span>
+                                            </button>
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
                             </div>
                         </div>

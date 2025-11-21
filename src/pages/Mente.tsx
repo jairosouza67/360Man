@@ -3,7 +3,7 @@ import ReactPlayer from 'react-player';
 
 import { useTrackerStore } from '../stores/trackerStore';
 import { useAuthStore } from '../stores/authStore';
-import { Brain, BookOpen, PenTool, Plus, CheckCircle, Play, Pause, RotateCcw, Calendar as CalendarIcon, Music, Upload, Volume2 } from 'lucide-react';
+import { Brain, BookOpen, PenTool, Plus, CheckCircle, Play, Pause, RotateCcw, Calendar as CalendarIcon, Music, Upload, Volume2, Edit2 } from 'lucide-react';
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -16,6 +16,8 @@ export default function Mente() {
   // Form states
   const [readingPages, setReadingPages] = useState('');
   const [journalEntry, setJournalEntry] = useState('');
+  const [isEditingReading, setIsEditingReading] = useState(false);
+  const [isEditingJournal, setIsEditingJournal] = useState(false);
 
   // Meditation Timer
   const [meditationTime, setMeditationTime] = useState(10 * 60); // 10 minutes default
@@ -90,6 +92,14 @@ export default function Mente() {
       timestamp: new Date().toISOString()
     });
     setReadingPages('');
+    setIsEditingReading(false);
+  };
+
+  const handleEditReading = () => {
+    if (readingTracker?.value) {
+      setReadingPages(readingTracker.value.pages.toString());
+      setIsEditingReading(true);
+    }
   };
 
   const handleSaveJournal = async () => {
@@ -101,6 +111,14 @@ export default function Mente() {
       timestamp: new Date().toISOString()
     });
     setJournalEntry('');
+    setIsEditingJournal(false);
+  };
+
+  const handleEditJournal = () => {
+    if (journalTracker?.value) {
+      setJournalEntry(journalTracker.value.content);
+      setIsEditingJournal(true);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -394,13 +412,20 @@ export default function Mente() {
           </div>
 
           <div className="p-6">
-            {readingTracker?.value?.completed ? (
+            {readingTracker?.value?.completed && !isEditingReading ? (
               <div className="text-center py-8">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-500/10 mb-4">
                   <BookOpen className="h-8 w-8 text-amber-500" />
                 </div>
                 <h3 className="text-white font-medium mb-1">{readingTracker.value.pages} páginas</h3>
                 <p className="text-zinc-500">Conhecimento absorvido</p>
+                <button
+                  onClick={handleEditReading}
+                  className="mt-4 text-xs text-zinc-600 hover:text-zinc-400 transition-colors flex items-center justify-center gap-1 mx-auto"
+                >
+                  <Edit2 className="h-3 w-3" />
+                  <span>Editar</span>
+                </button>
               </div>
             ) : (
               <div className="space-y-4">
@@ -443,13 +468,20 @@ export default function Mente() {
           </div>
 
           <div className="p-6">
-            {journalTracker?.value?.completed ? (
+            {journalTracker?.value?.completed && !isEditingJournal ? (
               <div className="text-center py-8">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 mb-4">
                   <PenTool className="h-8 w-8 text-emerald-500" />
                 </div>
                 <h3 className="text-white font-medium mb-1">Reflexão Registrada</h3>
                 <p className="text-zinc-500 line-clamp-2 px-4 italic">"{journalTracker.value.content}"</p>
+                <button
+                  onClick={handleEditJournal}
+                  className="mt-4 text-xs text-zinc-600 hover:text-zinc-400 transition-colors flex items-center justify-center gap-1 mx-auto"
+                >
+                  <Edit2 className="h-3 w-3" />
+                  <span>Editar</span>
+                </button>
               </div>
             ) : (
               <div className="space-y-4">

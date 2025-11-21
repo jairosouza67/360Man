@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTrackerStore } from '../stores/trackerStore';
 import { useAuthStore } from '../stores/authStore';
-import { Heart, Smile, PenTool, Plus, CheckCircle, Calendar as CalendarIcon } from 'lucide-react';
+import { Heart, Smile, PenTool, Plus, CheckCircle, Calendar as CalendarIcon, Edit2 } from 'lucide-react';
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -13,6 +13,7 @@ export default function VidaAfetiva() {
   // Form states
   const [emotionalState, setEmotionalState] = useState<number | null>(null);
   const [journalEntry, setJournalEntry] = useState('');
+  const [isEditingJournal, setIsEditingJournal] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -55,6 +56,14 @@ export default function VidaAfetiva() {
       timestamp: new Date().toISOString()
     });
     setJournalEntry('');
+    setIsEditingJournal(false);
+  };
+
+  const handleEditJournal = () => {
+    if (affectiveTracker?.value?.journal) {
+      setJournalEntry(affectiveTracker.value.journal);
+      setIsEditingJournal(true);
+    }
   };
 
   const toggleDateNight = async () => {
@@ -99,8 +108,8 @@ export default function VidaAfetiva() {
                 key={offset}
                 onClick={() => setSelectedDate(date)}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${isSelected
-                    ? 'bg-dark-700 text-white shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-300'
+                  ? 'bg-dark-700 text-white shadow-sm'
+                  : 'text-zinc-500 hover:text-zinc-300'
                   }`}
               >
                 {offset === 0 ? 'Hoje' : format(date, 'dd/MM')}
@@ -141,8 +150,8 @@ export default function VidaAfetiva() {
                     key={num}
                     onClick={() => handleSaveEmotionalState(num)}
                     className={`aspect-square rounded-lg font-medium transition-all ${isSelected
-                        ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/30'
-                        : 'bg-dark-900 text-zinc-500 hover:bg-dark-800 hover:text-pink-400'
+                      ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/30'
+                      : 'bg-dark-900 text-zinc-500 hover:bg-dark-800 hover:text-pink-400'
                       }`}
                   >
                     {num}
@@ -171,14 +180,14 @@ export default function VidaAfetiva() {
             <div className="mb-8">
               <div
                 className={`inline-flex items-center justify-center w-24 h-24 rounded-full mb-4 relative group cursor-pointer transition-all ${affectiveTracker?.value?.dateNight
-                    ? 'bg-red-500/20'
-                    : 'bg-dark-900 hover:bg-dark-800'
+                  ? 'bg-red-500/20'
+                  : 'bg-dark-900 hover:bg-dark-800'
                   }`}
                 onClick={toggleDateNight}
               >
                 <Heart className={`h-10 w-10 transition-all ${affectiveTracker?.value?.dateNight
-                    ? 'text-red-500 fill-red-500'
-                    : 'text-zinc-600 group-hover:text-red-400'
+                  ? 'text-red-500 fill-red-500'
+                  : 'text-zinc-600 group-hover:text-red-400'
                   }`} />
               </div>
               <h3 className="text-white font-medium mb-1">
@@ -192,8 +201,8 @@ export default function VidaAfetiva() {
             <button
               onClick={toggleDateNight}
               className={`w-full font-medium py-3 rounded-xl transition-all flex items-center justify-center space-x-2 ${affectiveTracker?.value?.dateNight
-                  ? 'bg-dark-900 text-zinc-400 hover:bg-dark-800'
-                  : 'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-500/20'
+                ? 'bg-dark-900 text-zinc-400 hover:bg-dark-800'
+                : 'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-500/20'
                 }`}
             >
               {affectiveTracker?.value?.dateNight ? (
@@ -225,13 +234,20 @@ export default function VidaAfetiva() {
           </div>
 
           <div className="p-6">
-            {affectiveTracker?.value?.journal ? (
+            {affectiveTracker?.value?.journal && !isEditingJournal ? (
               <div className="text-center py-8">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-500/10 mb-4">
                   <PenTool className="h-8 w-8 text-purple-500" />
                 </div>
                 <h3 className="text-white font-medium mb-1">Registro Salvo</h3>
                 <p className="text-zinc-500 line-clamp-3 px-4 italic">"{affectiveTracker.value.journal}"</p>
+                <button
+                  onClick={handleEditJournal}
+                  className="mt-4 text-xs text-zinc-600 hover:text-zinc-400 transition-colors flex items-center justify-center gap-1 mx-auto"
+                >
+                  <Edit2 className="h-3 w-3" />
+                  <span>Editar</span>
+                </button>
               </div>
             ) : (
               <div className="space-y-4">
@@ -283,8 +299,8 @@ export default function VidaAfetiva() {
                   {format(day, 'EEE', { locale: ptBR }).slice(0, 3)}
                 </span>
                 <div className={`w-full aspect-square rounded-lg flex items-center justify-center border transition-all ${hasActivity
-                    ? 'bg-pink-500/20 border-pink-500/50 text-pink-400'
-                    : 'bg-dark-900 border-white/5 text-zinc-700'
+                  ? 'bg-pink-500/20 border-pink-500/50 text-pink-400'
+                  : 'bg-dark-900 border-white/5 text-zinc-700'
                   }`}>
                   {hasActivity && <Heart className="h-4 w-4" />}
                 </div>
