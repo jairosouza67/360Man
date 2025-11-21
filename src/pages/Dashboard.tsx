@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import { useTrackerStore } from '../stores/trackerStore';
 import { Link } from 'react-router-dom';
-import { Target, Users, Clock, CheckCircle, Play, ArrowRight, Award } from 'lucide-react';
+import { Target, Users, Clock, CheckCircle, Play, ArrowRight } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isToday } from 'date-fns';
 import AphorismWidget from '../components/dashboard/AphorismWidget';
 import CleanDaysWidget from '../components/dashboard/CleanDaysWidget';

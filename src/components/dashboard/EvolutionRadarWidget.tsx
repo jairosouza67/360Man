@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip } from 'recharts';
 import { useTrackerStore } from '../../stores/trackerStore';
 import { startOfWeek, endOfWeek, eachDayOfInterval, format } from 'date-fns';

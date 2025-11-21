@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTrackerStore } from '../../stores/trackerStore';
 import { useAuthStore } from '../../stores/authStore';
-import { Brain, Play, Plus, Clock } from 'lucide-react';
+import { Brain, Play } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function DeepWorkWidget() {
