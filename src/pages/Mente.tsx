@@ -384,6 +384,7 @@ export default function Mente() {
           {/* ReactPlayer hidden */}
           <div className="hidden">
             {mediaSrc && (
+              // @ts-ignore
               <ReactPlayer
                 url={mediaSrc}
                 playing={isTimerRunning || isPreviewPlaying}

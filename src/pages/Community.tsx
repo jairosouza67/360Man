@@ -533,6 +533,25 @@ export default function Community() {
           </div>
         </div>
       </div>
+      {showCreatePost && (
+        <CreatePostModal
+          onClose={() => setShowCreatePost(false)}
+          onSubmit={handleCreatePost}
+        />
+      )}
+
+      {selectedPost && (
+        <PostDetailModal
+          post={selectedPost}
+          comments={comments}
+          newComment={newComment}
+          onClose={() => setSelectedPost(null)}
+          onLikePost={handleLikePost}
+          onCreateComment={handleCreateComment}
+          onSetNewComment={setNewComment}
+          onReportContent={handleReportContent}
+        />
+      )}
     </div>
   );
 }
@@ -771,6 +790,7 @@ function PostDetailModal({
                     </div>
                   </div>
                 </div>
+
                 <p className="text-zinc-300 text-sm mb-3 pl-11 leading-relaxed">{comment.content}</p>
                 <div className="flex items-center space-x-4 pl-11">
                   <button className="text-xs text-zinc-500 hover:text-white transition-colors font-medium">
@@ -795,7 +815,7 @@ function PostDetailModal({
           </div>
 
           {/* New Comment Input */}
-          <div className="flex items-start space-x-4 bg-dark-850 p-4 rounded-xl border border-white/5 sticky bottom-0">
+          < div className="flex items-start space-x-4 bg-dark-850 p-4 rounded-xl border border-white/5 sticky bottom-0" >
             <div className="flex-1">
               <textarea
                 value={newComment}
