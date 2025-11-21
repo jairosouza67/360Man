@@ -6,6 +6,8 @@ import { Target, Users, Clock, CheckCircle, Play, ArrowRight, Award } from 'luci
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isToday } from 'date-fns';
 import AphorismWidget from '../components/dashboard/AphorismWidget';
 import CleanDaysWidget from '../components/dashboard/CleanDaysWidget';
+import EvolutionRadarWidget from '../components/dashboard/EvolutionRadarWidget';
+import DeepWorkWidget from '../components/dashboard/DeepWorkWidget';
 
 export default function Dashboard() {
   const { user } = useAuthStore();
@@ -59,12 +61,6 @@ export default function Dashboard() {
     return () => { mounted = false; };
   }, [user, getStreak]);
 
-  const getPillarProgress = (pillar: string) => {
-    const pillarTrackers = trackers.filter(t => t.type === pillar);
-    const completed = pillarTrackers.filter(t => t.value?.completed).length;
-    return totalToday > 0 ? Math.round((completed / Math.max(totalToday, 1)) * 100) : 0;
-  };
-
   return (
     <div className="space-y-8">
       {/* Welcome & Primary Action */}
@@ -102,7 +98,7 @@ export default function Dashboard() {
       </div>
 
       {/* Key Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {/* Daily Progress */}
         <div className="bg-dark-850 p-6 rounded-2xl border border-white/10 hover:border-cobalt-500/30 transition-all group">
           <div className="flex items-center justify-between mb-4">
@@ -125,6 +121,9 @@ export default function Dashboard() {
 
         {/* Clean Streak */}
         <CleanDaysWidget days={Math.max(streaks.workout, streaks.reading, streaks.sleep)} type="general" />
+
+        {/* Deep Work Widget */}
+        <DeepWorkWidget />
 
         {/* Plan Progress */}
         <div className="bg-dark-850 p-6 rounded-2xl border border-white/10 hover:border-gold-500/30 transition-all group">
@@ -223,8 +222,12 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Weekly Overview & Stats */}
+        {/* Sidebar: Radar & Stats */}
         <div className="space-y-6">
+          {/* Evolution Radar */}
+          <EvolutionRadarWidget />
+
+          {/* Weekly Overview */}
           <div className="bg-dark-850 rounded-2xl p-6 border border-white/10">
             <h3 className="text-lg font-medium text-white mb-6">Consistência Semanal</h3>
             <div className="space-y-4">
@@ -266,40 +269,6 @@ export default function Dashboard() {
               Sua consistência nos últimos 7 dias está acima da média da comunidade. Mantenha o foco.
             </p>
           </div>
-        </div>
-      </div>
-
-      {/* Pillars Progress */}
-      <div className="bg-dark-850 p-6 border border-white/10">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-light text-white tracking-tight">Progresso por pilares</h2>
-          <Award className="h-5 w-5 text-neutral-500" />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {['workout', 'reading', 'sleep'].map(pillar => {
-            const progress = getPillarProgress(pillar);
-            const pillarNames = {
-              workout: 'Treino',
-              reading: 'Leitura',
-              sleep: 'Sono'
-            };
-
-            return (
-              <div key={pillar} className="text-center">
-                <div className="mb-3">
-                  <div className="text-3xl font-light text-white">{progress}%</div>
-                  <div className="text-sm text-neutral-400 font-light tracking-wide uppercase">{pillarNames[pillar as keyof typeof pillarNames]}</div>
-                </div>
-                <div className="bg-white/5 h-1">
-                  <div
-                    className="bg-gradient-to-r from-cobalt-500 to-gold-400 h-1 transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
         </div>
       </div>
     </div>

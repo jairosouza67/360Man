@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTrackerStore } from '../stores/trackerStore';
 import { useAuthStore } from '../stores/authStore';
 import { Brain, BookOpen, PenTool, Plus, CheckCircle, Play, Pause, RotateCcw, Calendar as CalendarIcon } from 'lucide-react';
@@ -18,6 +18,14 @@ export default function Mente() {
   const [meditationTime, setMeditationTime] = useState(10 * 60); // 10 minutes default
   const [timeLeft, setTimeLeft] = useState(10 * 60);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  // Background audio/video source (audio only)
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [mediaSrc, setMediaSrc] = useState<string | null>(null);
+  const [isBlob, setIsBlob] = useState(false);
+  const [sourceUrl, setSourceUrl] = useState('');
+  const [volume, setVolume] = useState(0.6);
+  const [loopAudio, setLoopAudio] = useState(false);
+  const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -37,6 +45,44 @@ export default function Mente() {
     }
     return () => clearInterval(interval);
   }, [isTimerRunning, timeLeft]);
+
+  // Play/pause background media according to timer and preview
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.volume = volume;
+    video.loop = loopAudio;
+
+    if (isTimerRunning) {
+      // ensure playback starts from beginning for the session
+      try {
+        video.currentTime = 0;
+      } catch (e) {
+        // ignore
+      }
+      video.play().catch(() => {});
+      setIsPreviewPlaying(true);
+    } else {
+      if (!isPreviewPlaying) {
+        // only pause if not previewing
+        video.pause();
+      }
+    }
+
+    if (timeLeft === 0) {
+      video.pause();
+    }
+  }, [isTimerRunning, volume, loopAudio, timeLeft, isPreviewPlaying]);
+
+  // Cleanup blob URL on unmount
+  useEffect(() => {
+    return () => {
+      if (isBlob && mediaSrc) {
+        try { URL.revokeObjectURL(mediaSrc); } catch (e) {}
+      }
+    };
+  }, [isBlob, mediaSrc]);
 
   const dateKey = format(selectedDate, 'yyyy-MM-dd');
 
@@ -91,6 +137,56 @@ export default function Mente() {
   const resetTimer = () => {
     setIsTimerRunning(false);
     setTimeLeft(meditationTime);
+  };
+
+  const handleFileChange = (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (isBlob && mediaSrc) {
+      try { URL.revokeObjectURL(mediaSrc); } catch (e) {}
+    }
+    const url = URL.createObjectURL(file);
+    setMediaSrc(url);
+    setIsBlob(true);
+    setSourceUrl('');
+  };
+
+  const handleSetUrl = () => {
+    if (!sourceUrl) return;
+    if (isBlob && mediaSrc) {
+      try { URL.revokeObjectURL(mediaSrc); } catch (e) {}
+    }
+    setMediaSrc(sourceUrl);
+    setIsBlob(false);
+  };
+
+  const handleRemoveSource = () => {
+    if (isBlob && mediaSrc) {
+      try { URL.revokeObjectURL(mediaSrc); } catch (e) {}
+    }
+    setMediaSrc(null);
+    setIsBlob(false);
+    setSourceUrl('');
+    setIsPreviewPlaying(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.removeAttribute('src');
+      try { videoRef.current.load(); } catch (e) {}
+    }
+  };
+
+  const togglePreview = async () => {
+    const video = videoRef.current;
+    if (!video || !mediaSrc) return;
+    if (isPreviewPlaying) {
+      video.pause();
+      setIsPreviewPlaying(false);
+    } else {
+      try {
+        await video.play();
+        setIsPreviewPlaying(true);
+      } catch (e) {}
+    }
   };
 
   // Weekly progress
@@ -197,9 +293,86 @@ export default function Mente() {
                     </button>
                   ))}
                 </div>
+                <div className="mt-4 text-left space-y-3">
+                  <label className="block text-sm font-medium text-zinc-400">Som de Fundo (vídeo — só áudio)</label>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="file"
+                      accept="video/*,audio/*"
+                      onChange={handleFileChange}
+                      className="text-sm text-zinc-300 bg-dark-900 rounded px-2 py-1"
+                    />
+
+                    <button
+                      onClick={handleRemoveSource}
+                      className="px-3 py-1 bg-red-600 hover:bg-red-500 text-white rounded text-sm"
+                    >
+                      Remover
+                    </button>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={sourceUrl}
+                      onChange={(e) => setSourceUrl(e.target.value)}
+                      placeholder="URL do vídeo/áudio"
+                      className="w-full bg-dark-900 border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
+                    />
+                    <button
+                      onClick={handleSetUrl}
+                      className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-sm"
+                    >
+                      Usar URL
+                    </button>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    <label className="text-sm text-zinc-400">Volume</label>
+                    <input
+                      type="range"
+                      min={0}
+                      max={1}
+                      step={0.01}
+                      value={volume}
+                      onChange={(e) => setVolume(Number(e.target.value))}
+                      className="w-32"
+                    />
+
+                    <label className="flex items-center text-sm text-zinc-400">
+                      <input
+                        type="checkbox"
+                        checked={loopAudio}
+                        onChange={(e) => setLoopAudio(e.target.checked)}
+                        className="mr-2"
+                      />
+                      Loop
+                    </label>
+
+                    <button
+                      onClick={togglePreview}
+                      className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-sm"
+                    >
+                      {isPreviewPlaying ? 'Parar' : 'Preview'}
+                    </button>
+                  </div>
+
+                  {mediaSrc && (
+                    <p className="text-xs text-zinc-500 truncate">Fonte: {mediaSrc}</p>
+                  )}
+                </div>
               </div>
             )}
           </div>
+          {/* Hidden video element used only for audio playback */}
+          <video
+            ref={(el) => (videoRef.current = el)}
+            src={mediaSrc || undefined}
+            style={{ display: 'none' }}
+            playsInline
+            preload="auto"
+          />
         </div>
 
         {/* Reading Section */}

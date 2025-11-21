@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTrackerStore } from '../stores/trackerStore';
 import { useAuthStore } from '../stores/authStore';
-import { Dumbbell, Utensils, Moon, Plus, CheckCircle, Calendar as CalendarIcon } from 'lucide-react';
+import { Dumbbell, Utensils, Moon, Plus, CheckCircle, Calendar as CalendarIcon, Edit2 } from 'lucide-react';
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -14,6 +14,8 @@ export default function Corpo() {
   const [workoutType, setWorkoutType] = useState('');
   const [workoutDuration, setWorkoutDuration] = useState('');
   const [sleepHours, setSleepHours] = useState('');
+  const [isEditingWorkout, setIsEditingWorkout] = useState(false);
+  const [isEditingSleep, setIsEditingSleep] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -40,6 +42,15 @@ export default function Corpo() {
 
     setWorkoutType('');
     setWorkoutDuration('');
+    setIsEditingWorkout(false);
+  };
+
+  const handleEditWorkout = () => {
+    if (workoutTracker?.value) {
+      setWorkoutType(workoutTracker.value.type);
+      setWorkoutDuration(workoutTracker.value.duration.toString());
+      setIsEditingWorkout(true);
+    }
   };
 
   const handleSaveSleep = async () => {
@@ -51,6 +62,14 @@ export default function Corpo() {
       timestamp: new Date().toISOString()
     });
     setSleepHours('');
+    setIsEditingSleep(false);
+  };
+
+  const handleEditSleep = () => {
+    if (sleepTracker?.value) {
+      setSleepHours(sleepTracker.value.hours.toString());
+      setIsEditingSleep(true);
+    }
   };
 
   const handleSaveDiet = async (status: 'full' | 'partial' | 'none') => {
@@ -116,13 +135,20 @@ export default function Corpo() {
           </div>
 
           <div className="p-6">
-            {workoutTracker?.value?.completed ? (
+            {workoutTracker?.value?.completed && !isEditingWorkout ? (
               <div className="text-center py-8">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/10 mb-4">
                   <Dumbbell className="h-8 w-8 text-green-500" />
                 </div>
                 <h3 className="text-white font-medium mb-1">{workoutTracker.value.type}</h3>
                 <p className="text-zinc-500">{workoutTracker.value.duration} minutos</p>
+                <button
+                  onClick={handleEditWorkout}
+                  className="mt-4 text-xs text-zinc-600 hover:text-zinc-400 transition-colors flex items-center justify-center gap-1 mx-auto"
+                >
+                  <Edit2 className="h-3 w-3" />
+                  <span>Editar</span>
+                </button>
               </div>
             ) : (
               <div className="space-y-4">
@@ -137,9 +163,7 @@ export default function Corpo() {
                     <option value="Musculação">Musculação</option>
                     <option value="Cardio">Cardio</option>
                     <option value="HIIT">HIIT</option>
-                    <option value="Artes Marciais">Artes Marciais</option>
                     <option value="Yoga/Mobilidade">Yoga/Mobilidade</option>
-                    <option value="Esporte">Esporte</option>
                   </select>
                 </div>
 
@@ -238,13 +262,20 @@ export default function Corpo() {
           </div>
 
           <div className="p-6">
-            {sleepTracker?.value?.completed ? (
+            {sleepTracker?.value?.completed && !isEditingSleep ? (
               <div className="text-center py-8">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-500/10 mb-4">
                   <Moon className="h-8 w-8 text-indigo-500" />
                 </div>
                 <h3 className="text-white font-medium mb-1">{sleepTracker.value.hours} horas</h3>
                 <p className="text-zinc-500">Registrado</p>
+                <button
+                  onClick={handleEditSleep}
+                  className="mt-4 text-xs text-zinc-600 hover:text-zinc-400 transition-colors flex items-center justify-center gap-1 mx-auto"
+                >
+                  <Edit2 className="h-3 w-3" />
+                  <span>Editar</span>
+                </button>
               </div>
             ) : (
               <div className="space-y-4">
