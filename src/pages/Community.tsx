@@ -427,7 +427,7 @@ export default function Community() {
                 Nenhum post ainda
               </h3>
               <p className="text-zinc-400 mb-6 max-w-md mx-auto">
-                Seja o primeiro a compartilhar sua jornada, dúvidas ou vitórias com a comunidade Man360.
+                Seja o primeiro a compartilhar sua jornada, dúvidas ou vitórias com a comunidade ManUp 360.
               </p>
               <button
                 onClick={() => setShowCreatePost(true)}

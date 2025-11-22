@@ -1,5 +1,5 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import logo from '../assets/logo.jpg';
+import logo from '../assets/manup360-logo.jpg';
 import { useAuthStore } from '../stores/authStore';
 import { useState } from 'react';
 import {
@@ -68,9 +68,9 @@ export default function Layout() {
               </button>
 
               <Link to="/app/dashboard" className="flex items-center space-x-3">
-                <img src={logo} alt="Man360 Logo" className="w-8 h-8 rounded-full" />
+                <img src={logo} alt="ManUp 360 Logo" className="w-8 h-8 rounded-full" />
                 <span className="text-lg sm:text-xl font-bold text-white tracking-tight gradient-text">
-                  Man360
+                  ManUp 360
                 </span>
               </Link>
             </div>
