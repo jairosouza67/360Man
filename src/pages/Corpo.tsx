@@ -12,8 +12,8 @@ import { WeeklyProgress } from '../components/body/WeeklyProgress';
 export default function Corpo() {
   const { user } = useAuthStore();
   const {
-    trackers,
-    habits,
+    trackers = [],
+    habits = [],
     loadTrackers,
     loadHabits,
     loadGoals,
@@ -32,23 +32,30 @@ export default function Corpo() {
 
   useEffect(() => {
     if (user) {
-      loadTrackers(user.id);
-      loadHabits(user.id);
-      loadGoals(user.id);
+      console.log('Corpo: Loading data for user:', user.id);
+      try {
+        loadTrackers(user.id);
+        loadHabits(user.id);
+        loadGoals(user.id);
+      } catch (error) {
+        console.error('Corpo: Error loading data:', error);
+      }
+    } else {
+      console.log('Corpo: No user found');
     }
   }, [user, loadTrackers, loadHabits, loadGoals]);
 
   const dateKey = format(selectedDate, 'yyyy-MM-dd');
 
   // Get trackers for selected date
-  const workoutTracker = trackers.find(t => t.date === dateKey && t.type === 'workout');
-  const sleepTracker = trackers.find(t => t.date === dateKey && t.type === 'sleep');
-  const dietTracker = trackers.find(t => t.date === dateKey && t.type === 'diet');
-  const waterTracker = trackers.find(t => t.date === dateKey && t.type === 'water');
+  const workoutTracker = trackers?.find(t => t.date === dateKey && t.type === 'workout');
+  const sleepTracker = trackers?.find(t => t.date === dateKey && t.type === 'sleep');
+  const dietTracker = trackers?.find(t => t.date === dateKey && t.type === 'diet');
+  const waterTracker = trackers?.find(t => t.date === dateKey && t.type === 'water');
 
   // Get specialized trackers
-  const photoTrackers = trackers.filter(t => t.type === 'body_photo');
-  const measurementTrackers = trackers.filter(t => t.type === 'body_measurement');
+  const photoTrackers = trackers?.filter(t => t.type === 'body_photo') || [];
+  const measurementTrackers = trackers?.filter(t => t.type === 'body_measurement') || [];
 
   const handleSaveWorkout = async () => {
     if (!user || !workoutType || !workoutDuration) return;
@@ -123,36 +130,47 @@ export default function Corpo() {
 
   // Weekly progress
 
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+          <p className="text-zinc-400">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Corpo & Vitalidade</h1>
-          <p className="text-zinc-400">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Corpo & Vitalidade</h1>
+          <p className="text-sm sm:text-base text-zinc-400">
             Monitore e otimize sua máquina biológica.
           </p>
         </div>
       </div>
 
       {/* Top Section: Gallery & Measurements */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <EvolutionGallery photos={photoTrackers} />
-        <MeasurementLog measurements={measurementTrackers} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+        {photoTrackers && <EvolutionGallery photos={photoTrackers} />}
+        {measurementTrackers && <MeasurementLog measurements={measurementTrackers} />}
       </div>
 
 
 
       {/* Strategy Section */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-          <h2 className="text-2xl font-bold text-white">Estratégia Diária</h2>
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex items-center gap-3 border-b border-white/10 pb-3 sm:pb-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Estratégia Diária</h2>
           <div className="h-px flex-1 bg-white/10"></div>
         </div>
 
         {/* Date Selector */}
         <div className="flex justify-end">
-          <div className="flex items-center space-x-2 bg-dark-850 p-1 rounded-lg border border-white/10">
+          <div className="flex items-center space-x-1 sm:space-x-2 bg-dark-850 p-1 rounded-lg border border-white/10">
             {[-2, -1, 0].map(offset => {
               const date = subDays(new Date(), Math.abs(offset));
               const isSelected = isSameDay(date, selectedDate);
@@ -160,7 +178,7 @@ export default function Corpo() {
                 <button
                   key={offset}
                   onClick={() => setSelectedDate(date)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${isSelected
+                  className={`px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-all ${isSelected
                     ? 'bg-dark-700 text-white shadow-sm'
                     : 'text-zinc-500 hover:text-zinc-300'
                     }`}
@@ -172,7 +190,7 @@ export default function Corpo() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
           {/* Workout Section */}
           <div className="bg-dark-850 rounded-2xl border border-white/10 overflow-hidden">
             <div className="p-6 border-b border-white/10 flex justify-between items-center">
@@ -416,17 +434,19 @@ export default function Corpo() {
         </div>
 
         {/* Goals & Habits */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <GoalManager />
-          <HabitTracker
-            habits={habits}
-            logs={trackers.filter(t => t.type === 'habit_log')}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+          {user && <GoalManager />}
+          {user && habits && (
+            <HabitTracker
+              habits={habits}
+              logs={trackers?.filter(t => t.type === 'habit_log') || []}
+            />
+          )}
         </div>
       </div>
 
       {/* Weekly Progress */}
-      <WeeklyProgress trackers={trackers} />
+      {trackers && <WeeklyProgress trackers={trackers} />}
     </div>
   );
 }

@@ -175,7 +175,7 @@ export default function Layout() {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 lg:ml-64 p-4 sm:p-6 lg:p-8 bg-dark-900">
+        <main className="flex-1 lg:ml-64 p-3 sm:p-4 md:p-6 lg:p-8 bg-dark-900">
           <Outlet />
         </main>
       </div>

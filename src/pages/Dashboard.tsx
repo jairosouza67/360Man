@@ -62,29 +62,29 @@ export default function Dashboard() {
   }, [user, getStreak]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Welcome & Primary Action */}
-      <div className="flex flex-col md:flex-row gap-6 items-stretch">
-        <div className="flex-1 bg-gradient-to-br from-dark-800 to-dark-900 rounded-2xl p-8 border border-white/5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-5">
-            <Target className="h-32 w-32 text-white" />
+      <div className="flex flex-col md:flex-row gap-4 sm:gap-6 items-stretch">
+        <div className="flex-1 bg-gradient-to-br from-dark-800 to-dark-900 rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-white/5 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 sm:p-8 opacity-5">
+            <Target className="h-20 sm:h-32 w-20 sm:w-32 text-white" />
           </div>
           <div className="relative z-10">
-            <h1 className="text-3xl font-bold text-white mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
               Comando Central
             </h1>
-            <p className="text-zinc-400 mb-6 max-w-lg">
+            <p className="text-sm sm:text-base text-zinc-400 mb-4 sm:mb-6 max-w-lg">
               {currentPlan
                 ? `Dia ${Math.ceil((Date.now() - new Date(currentPlan.startDate).getTime()) / (1000 * 60 * 60 * 24))} do Protocolo de 90 Dias`
                 : 'Sua jornada de auto-domínio começa agora.'}
             </p>
 
-            <div className="flex items-center space-x-4">
-              <Link to="/app/disciplina" className="bg-cobalt-600 hover:bg-cobalt-500 text-white px-6 py-3 rounded-lg font-medium flex items-center space-x-2 transition-all shadow-lg shadow-cobalt-500/20 hover:shadow-cobalt-500/40 hover:-translate-y-0.5">
-                <Play className="h-5 w-5 fill-current" />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+              <Link to="/app/disciplina" className="bg-cobalt-600 hover:bg-cobalt-500 text-white px-4 sm:px-6 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-all shadow-lg shadow-cobalt-500/20 hover:shadow-cobalt-500/40 hover:-translate-y-0.5 text-sm sm:text-base">
+                <Play className="h-4 sm:h-5 w-4 sm:w-5 fill-current" />
                 <span>Iniciar Protocolo Diário</span>
               </Link>
-              <Link to="/app/content" className="px-6 py-3 rounded-lg font-medium text-zinc-300 hover:text-white hover:bg-white/5 transition-colors flex items-center space-x-2">
+              <Link to="/app/content" className="px-4 sm:px-6 py-3 rounded-lg font-medium text-zinc-300 hover:text-white hover:bg-white/5 transition-colors flex items-center justify-center space-x-2 text-sm sm:text-base">
                 <span>Sua carreira</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
@@ -98,19 +98,19 @@ export default function Dashboard() {
       </div>
 
       {/* Key Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
         {/* Daily Progress */}
-        <div className="bg-dark-850 p-6 rounded-2xl border border-white/10 hover:border-cobalt-500/30 transition-all group">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-dark-850 p-5 sm:p-6 rounded-xl sm:rounded-2xl border border-white/10 hover:border-cobalt-500/30 transition-all group">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
             <div className="p-2 bg-cobalt-500/10 rounded-lg group-hover:bg-cobalt-500/20 transition-colors">
-              <CheckCircle className="h-6 w-6 text-cobalt-400" />
+              <CheckCircle className="h-5 sm:h-6 w-5 sm:w-6 text-cobalt-400" />
             </div>
             <span className="text-xs text-zinc-500 uppercase font-medium tracking-wider">Hoje</span>
           </div>
-          <div className="text-3xl font-light text-white mb-1">
+          <div className="text-2xl sm:text-3xl font-light text-white mb-1">
             {totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0}%
           </div>
-          <p className="text-sm text-zinc-400 mb-3">Conclusão de tarefas</p>
+          <p className="text-xs sm:text-sm text-zinc-400 mb-2 sm:mb-3">Conclusão de tarefas</p>
           <div className="bg-dark-900 rounded-full h-1.5 overflow-hidden">
             <div
               className="bg-cobalt-500 h-full rounded-full transition-all duration-500"
