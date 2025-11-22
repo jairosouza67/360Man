@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useTrackerStore } from '../stores/trackerStore';
 import { useAuthStore } from '../stores/authStore';
-import { Dumbbell, Utensils, Moon, Plus, CheckCircle, Calendar as CalendarIcon, Edit2, Droplets } from 'lucide-react';
-import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { Dumbbell, Utensils, Moon, Plus, CheckCircle, Edit2, Droplets } from 'lucide-react';
+import { format, subDays, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
 import { EvolutionGallery } from '../components/body/EvolutionGallery';
 import { MeasurementLog } from '../components/body/MeasurementLog';
 import { HabitTracker } from '../components/body/HabitTracker';
@@ -12,7 +11,7 @@ import { WeeklyProgress } from '../components/body/WeeklyProgress';
 
 export default function Corpo() {
   const { user } = useAuthStore();
-  const { trackers, habits, goals, loadTrackers, loadHabits, loadGoals, saveTrackerValue } = useTrackerStore();
+  const { trackers, habits, loadTrackers, loadHabits, loadGoals, saveTrackerValue } = useTrackerStore();
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Form states
@@ -116,9 +115,6 @@ export default function Corpo() {
   };
 
   // Weekly progress
-  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-  const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
-  const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">

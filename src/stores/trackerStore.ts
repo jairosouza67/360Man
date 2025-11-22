@@ -15,7 +15,7 @@ import {
 export interface TrackerEntry {
   id: string;
   userId: string;
-  type: 'workout' | 'sleep' | 'reading' | 'sexuality' | 'posture' | 'habits' | 'diet' | 'meditation' | 'journal' | 'affective' | 'career' | 'community' | 'body_photo' | 'body_measurement' | 'habit_log' | 'weekly_metric';
+  type: 'workout' | 'sleep' | 'reading' | 'sexuality' | 'posture' | 'habits' | 'diet' | 'meditation' | 'journal' | 'affective' | 'career' | 'community' | 'body_photo' | 'body_measurement' | 'habit_log' | 'weekly_metric' | 'water';
   date: string;
   value: any;
   metadata?: Record<string, any>;
@@ -109,7 +109,7 @@ interface TrackerStore {
   createGoal: (data: Omit<Goal, 'id' | 'createdAt'>) => Promise<void>;
   updateGoal: (id: string, data: Partial<Goal>) => Promise<void>;
   deleteGoal: (id: string) => Promise<void>;
-  checkGoals: (userId: string) => Promise<void>;
+  checkGoals: () => Promise<void>;
 }
 
 export const useTrackerStore = create<TrackerStore>((set, get) => ({
@@ -225,7 +225,7 @@ export const useTrackerStore = create<TrackerStore>((set, get) => ({
 
       // Check goals after creating tracker
       const { checkGoals } = get();
-      await checkGoals(data.userId);
+      await checkGoals();
     } catch (error) {
       console.error('Create tracker error:', error);
       throw error;
@@ -373,7 +373,7 @@ export const useTrackerStore = create<TrackerStore>((set, get) => ({
       }
       // Check goals after saving value
       const { checkGoals } = get();
-      await checkGoals(userId);
+      await checkGoals();
     } catch (error) {
       console.error('Save tracker value error:', error);
       throw error;
@@ -496,7 +496,7 @@ export const useTrackerStore = create<TrackerStore>((set, get) => ({
     }
   },
 
-  checkGoals: async (userId: string) => {
+  checkGoals: async () => {
     const { goals, trackers, updateGoal } = get();
     const activeGoals = goals.filter(g => g.status === 'active');
 
