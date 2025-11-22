@@ -15,7 +15,7 @@ import {
 export interface TrackerEntry {
   id: string;
   userId: string;
-  type: 'workout' | 'sleep' | 'reading' | 'sexuality' | 'posture' | 'habits' | 'diet' | 'meditation' | 'journal' | 'affective' | 'career' | 'community';
+  type: 'workout' | 'sleep' | 'reading' | 'sexuality' | 'posture' | 'habits' | 'diet' | 'meditation' | 'journal' | 'affective' | 'career' | 'community' | 'body_photo' | 'body_measurement' | 'habit_log' | 'weekly_metric';
   date: string;
   value: any;
   metadata?: Record<string, any>;
@@ -48,8 +48,42 @@ export interface Plan {
   updatedAt: string;
 }
 
+export interface Habit {
+  id: string;
+  userId: string;
+  title: string;
+  type: 'boolean' | 'numeric' | 'time';
+  goal?: number;
+  unit?: string;
+  color?: string;
+  createdAt: string;
+}
+
+export interface Goal {
+  id: string;
+  userId: string;
+  title: string;
+  startDate: string;
+  deadline: string;
+  category: string;
+  checklist: { id: string; text: string; completed: boolean }[];
+  type: 'manual' | 'measurement' | 'tracker';
+  target?: {
+    metric: string;
+    value: number;
+    operator: '<=' | '>=' | '==';
+  };
+  status: 'active' | 'completed';
+  progress: number;
+  actionPlan?: string;
+  result?: string;
+  createdAt: string;
+}
+
 interface TrackerStore {
   trackers: TrackerEntry[];
+  habits: Habit[];
+  goals: Goal[];
   plans: Plan[];
   currentPlan: Plan | null;
   loading: boolean;
@@ -64,10 +98,24 @@ interface TrackerStore {
   getStreak: (userId: string, type: string) => Promise<number>;
   saveTrackerValue: (userId: string, date: string, type: string, value: any) => Promise<void>;
   exportTrackers: (userId: string, format: 'csv' | 'json') => Promise<string>;
+
+  // Habit Actions
+  loadHabits: (userId: string) => Promise<void>;
+  createHabit: (data: Omit<Habit, 'id' | 'createdAt'>) => Promise<void>;
+  deleteHabit: (id: string) => Promise<void>;
+
+  // Goal Actions
+  loadGoals: (userId: string) => Promise<void>;
+  createGoal: (data: Omit<Goal, 'id' | 'createdAt'>) => Promise<void>;
+  updateGoal: (id: string, data: Partial<Goal>) => Promise<void>;
+  deleteGoal: (id: string) => Promise<void>;
+  checkGoals: (userId: string) => Promise<void>;
 }
 
 export const useTrackerStore = create<TrackerStore>((set, get) => ({
   trackers: [],
+  habits: [],
+  goals: [],
   plans: [],
   currentPlan: null,
   loading: false,
@@ -174,6 +222,10 @@ export const useTrackerStore = create<TrackerStore>((set, get) => ({
       } as TrackerEntry;
 
       set(state => ({ trackers: [...state.trackers, newTracker] }));
+
+      // Check goals after creating tracker
+      const { checkGoals } = get();
+      await checkGoals(data.userId);
     } catch (error) {
       console.error('Create tracker error:', error);
       throw error;
@@ -319,6 +371,9 @@ export const useTrackerStore = create<TrackerStore>((set, get) => ({
           metadata: {}
         });
       }
+      // Check goals after saving value
+      const { checkGoals } = get();
+      await checkGoals(userId);
     } catch (error) {
       console.error('Save tracker value error:', error);
       throw error;
@@ -342,6 +397,146 @@ export const useTrackerStore = create<TrackerStore>((set, get) => ({
       ]);
 
       return [headers, ...rows].map(row => row.join(',')).join('\n');
+    }
+  },
+
+  loadHabits: async (userId: string) => {
+    try {
+      const habitsRef = collection(db, 'habits');
+      const q = query(habitsRef, where('userId', '==', userId));
+      const querySnapshot = await getDocs(q);
+      const habits: Habit[] = [];
+
+      querySnapshot.forEach((doc) => {
+        habits.push({ id: doc.id, ...doc.data() } as Habit);
+      });
+
+      set({ habits });
+    } catch (error) {
+      console.error('Load habits error:', error);
+    }
+  },
+
+  createHabit: async (data: Omit<Habit, 'id' | 'createdAt'>) => {
+    try {
+      const now = new Date().toISOString();
+      const habitData = { ...data, createdAt: now };
+      const docRef = await addDoc(collection(db, 'habits'), habitData);
+
+      const newHabit: Habit = { id: docRef.id, ...habitData };
+      set(state => ({ habits: [...state.habits, newHabit] }));
+    } catch (error) {
+      console.error('Create habit error:', error);
+      throw error;
+    }
+  },
+
+  deleteHabit: async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'habits', id));
+      set(state => ({ habits: state.habits.filter(h => h.id !== id) }));
+    } catch (error) {
+      console.error('Delete habit error:', error);
+      throw error;
+    }
+  },
+
+  loadGoals: async (userId: string) => {
+    try {
+      const goalsRef = collection(db, 'goals');
+      const q = query(goalsRef, where('userId', '==', userId));
+      const querySnapshot = await getDocs(q);
+      const goals: Goal[] = [];
+
+      querySnapshot.forEach((doc) => {
+        goals.push({ id: doc.id, ...doc.data() } as Goal);
+      });
+
+      set({ goals });
+    } catch (error) {
+      console.error('Load goals error:', error);
+    }
+  },
+
+  createGoal: async (data: Omit<Goal, 'id' | 'createdAt'>) => {
+    try {
+      const now = new Date().toISOString();
+      const goalData = { ...data, createdAt: now };
+      const docRef = await addDoc(collection(db, 'goals'), goalData);
+
+      const newGoal: Goal = { id: docRef.id, ...goalData };
+      set(state => ({ goals: [...state.goals, newGoal] }));
+    } catch (error) {
+      console.error('Create goal error:', error);
+      throw error;
+    }
+  },
+
+  updateGoal: async (id: string, data: Partial<Goal>) => {
+    try {
+      const docRef = doc(db, 'goals', id);
+      await updateDoc(docRef, data);
+
+      set(state => ({
+        goals: state.goals.map(g => g.id === id ? { ...g, ...data } : g)
+      }));
+    } catch (error) {
+      console.error('Update goal error:', error);
+      throw error;
+    }
+  },
+
+  deleteGoal: async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'goals', id));
+      set(state => ({ goals: state.goals.filter(g => g.id !== id) }));
+    } catch (error) {
+      console.error('Delete goal error:', error);
+      throw error;
+    }
+  },
+
+  checkGoals: async (userId: string) => {
+    const { goals, trackers, updateGoal } = get();
+    const activeGoals = goals.filter(g => g.status === 'active');
+
+    for (const goal of activeGoals) {
+      let newProgress = goal.progress;
+      let shouldUpdate = false;
+
+      if (goal.type === 'measurement' && goal.target) {
+        // Find latest measurement for this metric
+        const measurements = trackers
+          .filter(t => t.type === 'body_measurement')
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        const latest = measurements[0];
+        if (latest && latest.value[goal.target.metric]) {
+          const currentVal = parseFloat(latest.value[goal.target.metric]);
+          const targetVal = goal.target.value;
+
+          // Calculate progress based on operator
+          if (goal.target.operator === '<=') {
+            if (currentVal <= targetVal) newProgress = 100;
+            else newProgress = Math.min(100, Math.max(0, (targetVal / currentVal) * 100));
+          } else if (goal.target.operator === '>=') {
+            newProgress = Math.min(100, (currentVal / targetVal) * 100);
+          }
+          shouldUpdate = true;
+        }
+      } else if (goal.type === 'tracker' && goal.target) {
+        // Count trackers
+        const count = trackers.filter(t => t.type === goal.target!.metric).length;
+        newProgress = Math.min(100, (count / goal.target.value) * 100);
+        shouldUpdate = true;
+      }
+
+      if (shouldUpdate && newProgress !== goal.progress) {
+        await updateGoal(goal.id, {
+          progress: Math.round(newProgress),
+          status: newProgress >= 100 ? 'completed' : 'active'
+        });
+      }
     }
   }
 }));

@@ -74,6 +74,26 @@ export async function uploadPlanAttachment(
 }
 
 /**
+ * Upload body photo for evolution gallery
+ */
+export async function uploadBodyPhoto(
+    file: File,
+    userId: string
+): Promise<UploadResult> {
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        throw new Error('Only image files are allowed');
+    }
+
+    // Validate file size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+        throw new Error('File must be less than 10MB');
+    }
+
+    return uploadFile(file, 'body-photos', userId);
+}
+
+/**
  * Delete a file from Firebase Storage
  */
 export async function deleteFile(path: string): Promise<void> {

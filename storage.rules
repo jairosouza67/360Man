@@ -25,5 +25,14 @@ service firebase.storage {
                    && request.resource.size < 10 * 1024 * 1024;
       allow delete: if request.auth.uid == userId;
     }
+
+    // Body photos for evolution gallery - max 10MB, images only
+    match /body-photos/{userId}/{fileName} {
+      allow read: if request.auth.uid == userId;
+      allow write: if request.auth.uid == userId
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth.uid == userId;
+    }
   }
 }
