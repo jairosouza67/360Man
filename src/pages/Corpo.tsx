@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTrackerStore } from '../stores/trackerStore';
 import { useAuthStore } from '../stores/authStore';
 import { Dumbbell, Utensils, Moon, Plus, CheckCircle, Edit2, Droplets } from 'lucide-react';
-import { format, subDays, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
+import { format, subDays, isSameDay } from 'date-fns';
 import { EvolutionGallery } from '../components/body/EvolutionGallery';
 import { MeasurementLog } from '../components/body/MeasurementLog';
 import { HabitTracker } from '../components/body/HabitTracker';
