@@ -25,12 +25,20 @@ export function EvolutionGallery({ photos }: EvolutionGalleryProps) {
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (!file || !user) return;
+        if (!file || !user) {
+            console.log('Upload cancelled: no file or user', { file: !!file, user: !!user });
+            return;
+        }
+
+        console.log('Starting photo upload:', { fileName: file.name, fileSize: file.size, fileType: file.type });
 
         try {
             setIsUploading(true);
+            console.log('Uploading to Firebase Storage...');
             const { url } = await uploadBodyPhoto(file, user.id);
+            console.log('Upload successful, URL:', url);
 
+            console.log('Creating tracker entry...');
             await createTracker({
                 userId: user.id,
                 type: 'body_photo',
@@ -43,9 +51,16 @@ export function EvolutionGallery({ photos }: EvolutionGalleryProps) {
                     notes: ''
                 }
             });
-        } catch (error) {
+            console.log('Tracker created successfully!');
+            
+            // Reset file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        } catch (error: any) {
             console.error('Error uploading photo:', error);
-            alert('Erro ao fazer upload da foto. Tente novamente.');
+            const errorMessage = error?.message || 'Erro desconhecido';
+            alert(`Erro ao fazer upload da foto: ${errorMessage}\n\nVerifique o console para mais detalhes.`);
         } finally {
             setIsUploading(false);
         }

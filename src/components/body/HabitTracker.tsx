@@ -32,19 +32,38 @@ export function HabitTracker({ habits, logs }: HabitTrackerProps) {
     };
 
     const handleCreateHabit = async () => {
-        if (!user || !newHabit.title) return;
+        if (!user || !newHabit.title) {
+            console.log('Validation failed:', { hasUser: !!user, hasTitle: !!newHabit.title });
+            alert('Por favor, preencha o nome do hábito.');
+            return;
+        }
 
-        await createHabit({
-            userId: user.id,
-            title: newHabit.title,
-            type: newHabit.type as any,
-            goal: newHabit.goal,
-            unit: newHabit.unit,
-            color: newHabit.color
-        });
+        try {
+            console.log('Creating habit with data:', {
+                userId: user.id,
+                title: newHabit.title,
+                type: newHabit.type,
+                goal: newHabit.goal
+            });
 
-        setIsCreating(false);
-        setNewHabit({ title: '', type: 'boolean', goal: 1, unit: '', color: 'green' });
+            await createHabit({
+                userId: user.id,
+                title: newHabit.title,
+                type: newHabit.type as any,
+                goal: newHabit.goal,
+                unit: newHabit.unit,
+                color: newHabit.color
+            });
+
+            console.log('Habit created successfully!');
+            alert('Hábito criado com sucesso!');
+
+            setIsCreating(false);
+            setNewHabit({ title: '', type: 'boolean', goal: 1, unit: '', color: 'green' });
+        } catch (error: any) {
+            console.error('Error creating habit:', error);
+            alert(`Erro ao criar hábito: ${error.message || 'Erro desconhecido'}. Verifique o console.`);
+        }
     };
 
     const handleLogHabit = async (habit: Habit, value: number) => {

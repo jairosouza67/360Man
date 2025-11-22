@@ -12,8 +12,18 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
+console.log('Firebase config loaded:', {
+  hasApiKey: !!firebaseConfig.apiKey,
+  hasAuthDomain: !!firebaseConfig.authDomain,
+  hasProjectId: !!firebaseConfig.projectId,
+  hasStorageBucket: !!firebaseConfig.storageBucket,
+  storageBucket: firebaseConfig.storageBucket
+});
+
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+console.log('Firebase initialized successfully');
 

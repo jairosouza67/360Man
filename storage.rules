@@ -1,38 +1,26 @@
 rules_version = '2';
+
 service firebase.storage {
   match /b/{bucket}/o {
-    // Avatar uploads - max 5MB, images only
-    match /avatars/{userId}/{fileName} {
+    // Allow authenticated users to upload and read their own files
+    match /body-photos/{userId}/{allPaths=**} {
       allow read: if request.auth != null;
-      allow write: if request.auth.uid == userId 
-                   && request.resource.size < 5 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-      allow delete: if request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Journal attachments - max 10MB
-    match /journal-attachments/{userId}/{fileName} {
-      allow read: if request.auth.uid == userId;
-      allow write: if request.auth.uid == userId
-                   && request.resource.size < 10 * 1024 * 1024;
-      allow delete: if request.auth.uid == userId;
+    match /avatars/{userId}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Workout/diet plan attachments - max 10MB
-    match /plan-attachments/{userId}/{fileName} {
-      allow read: if request.auth.uid == userId;
-      allow write: if request.auth.uid == userId
-                   && request.resource.size < 10 * 1024 * 1024;
-      allow delete: if request.auth.uid == userId;
+    match /journal-attachments/{userId}/{allPaths=**} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
-
-    // Body photos for evolution gallery - max 10MB, images only
-    match /body-photos/{userId}/{fileName} {
-      allow read: if request.auth.uid == userId;
-      allow write: if request.auth.uid == userId
-                   && request.resource.size < 10 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-      allow delete: if request.auth.uid == userId;
+    
+    match /plan-attachments/{userId}/{allPaths=**} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }

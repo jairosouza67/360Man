@@ -11,7 +11,14 @@ import { WeeklyProgress } from '../components/body/WeeklyProgress';
 
 export default function Corpo() {
   const { user } = useAuthStore();
-  const { trackers, habits, loadTrackers, loadHabits, loadGoals, saveTrackerValue } = useTrackerStore();
+  const {
+    trackers,
+    habits,
+    loadTrackers,
+    loadHabits,
+    loadGoals,
+    saveTrackerValue,
+  } = useTrackerStore();
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Form states

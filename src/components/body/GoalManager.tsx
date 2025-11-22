@@ -14,36 +14,70 @@ export function GoalManager() {
         type: 'manual',
         checklist: [],
         progress: 0,
-        status: 'active'
+        status: 'active',
+        deadline: '', // Initialize with empty string to avoid uncontrolled input warning
+        target: undefined,
+        actionPlan: ''
     });
     const [checklistInput, setChecklistInput] = useState('');
 
     const handleCreateGoal = async () => {
-        if (!user || !newGoal.title || !newGoal.deadline) return;
+        if (!user || !newGoal.title || !newGoal.deadline) {
+            console.log('Validation failed:', { hasUser: !!user, hasTitle: !!newGoal.title, hasDeadline: !!newGoal.deadline });
+            alert('Por favor, preencha todos os campos obrigatórios (Título e Prazo).');
+            return;
+        }
 
-        await createGoal({
-            userId: user.id,
-            title: newGoal.title,
-            startDate: new Date().toISOString(),
-            deadline: newGoal.deadline,
-            category: newGoal.category || 'Geral',
-            checklist: newGoal.checklist || [],
-            type: newGoal.type as any,
-            target: newGoal.target,
-            actionPlan: newGoal.actionPlan,
-            status: 'active',
-            progress: 0
-        });
+        try {
+            console.log('Creating goal with data:', {
+                userId: user.id,
+                title: newGoal.title,
+                deadline: newGoal.deadline,
+                type: newGoal.type
+            });
 
-        setIsCreating(false);
-        setNewGoal({
-            title: '',
-            category: 'Geral',
-            type: 'manual',
-            checklist: [],
-            progress: 0,
-            status: 'active'
-        });
+            // Construct payload to avoid undefined values
+            const payload: any = {
+                userId: user.id,
+                title: newGoal.title,
+                startDate: new Date().toISOString(),
+                deadline: newGoal.deadline,
+                category: newGoal.category || 'Geral',
+                checklist: newGoal.checklist || [],
+                type: newGoal.type as any,
+                status: 'active',
+                progress: 0
+            };
+
+            if (newGoal.type !== 'manual' && newGoal.target) {
+                payload.target = newGoal.target;
+            }
+
+            if (newGoal.actionPlan) {
+                payload.actionPlan = newGoal.actionPlan;
+            }
+
+            await createGoal(payload);
+
+            console.log('Goal created successfully!');
+            alert('Meta criada com sucesso!');
+
+            setIsCreating(false);
+            setNewGoal({
+                title: '',
+                category: 'Geral',
+                type: 'manual',
+                checklist: [],
+                progress: 0,
+                status: 'active',
+                deadline: '',
+                target: undefined,
+                actionPlan: ''
+            });
+        } catch (error: any) {
+            console.error('Error creating goal:', error);
+            alert(`Erro ao criar meta: ${error.message || 'Erro desconhecido'}. Verifique o console.`);
+        }
     };
 
     const addChecklistItem = () => {

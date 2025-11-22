@@ -14,15 +14,31 @@ export async function uploadFile(
     path: string,
     userId: string
 ): Promise<UploadResult> {
+    console.log('uploadFile called:', { fileName: file.name, path, userId });
+    
     const fileExtension = file.name.split('.').pop();
     const fileName = `${Date.now()}.${fileExtension}`;
     const fullPath = `${path}/${userId}/${fileName}`;
+    console.log('Upload path:', fullPath);
 
-    const storageRef = ref(storage, fullPath);
-    await uploadBytes(storageRef, file);
-    const url = await getDownloadURL(storageRef);
+    try {
+        const storageRef = ref(storage, fullPath);
+        console.log('Uploading bytes to Firebase...');
+        await uploadBytes(storageRef, file);
+        console.log('Getting download URL...');
+        const url = await getDownloadURL(storageRef);
+        console.log('Download URL obtained:', url);
 
-    return { url, path: fullPath };
+        return { url, path: fullPath };
+    } catch (error: any) {
+        console.error('Upload error details:', {
+            code: error.code,
+            message: error.message,
+            name: error.name,
+            fullError: error
+        });
+        throw error;
+    }
 }
 
 /**
@@ -80,17 +96,31 @@ export async function uploadBodyPhoto(
     file: File,
     userId: string
 ): Promise<UploadResult> {
+    console.log('uploadBodyPhoto called:', { fileName: file.name, userId });
+    
     // Validate file type
     if (!file.type.startsWith('image/')) {
-        throw new Error('Only image files are allowed');
+        console.error('Invalid file type:', file.type);
+        throw new Error('Apenas arquivos de imagem são permitidos');
     }
 
     // Validate file size (10MB)
     if (file.size > 10 * 1024 * 1024) {
-        throw new Error('File must be less than 10MB');
+        console.error('File too large:', file.size);
+        throw new Error('O arquivo deve ter menos de 10MB');
     }
 
-    return uploadFile(file, 'body-photos', userId);
+    try {
+        const result = await uploadFile(file, 'body-photos', userId);
+        console.log('Upload completed successfully:', result);
+        return result;
+    } catch (error: any) {
+        console.error('Firebase upload error:', error);
+        if (error.code === 'storage/unauthorized') {
+            throw new Error('Permissão negada. Verifique as regras do Firebase Storage.');
+        }
+        throw error;
+    }
 }
 
 /**

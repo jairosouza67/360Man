@@ -128,16 +128,23 @@ export function MeasurementLog({ measurements }: MeasurementLogProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!user) return;
+        if (!user) {
+            console.log('No user found');
+            alert('Usuário não encontrado. Faça login novamente.');
+            return;
+        }
 
         try {
             setIsSubmitting(true);
+            console.log('Submitting measurements:', formData);
 
             // Convert strings to numbers
             const numericData = Object.entries(formData).reduce((acc, [key, value]) => ({
                 ...acc,
                 [key]: value ? parseFloat(value) : 0
             }), {});
+
+            console.log('Numeric data:', numericData);
 
             await createTracker({
                 userId: user.id,
@@ -149,10 +156,14 @@ export function MeasurementLog({ measurements }: MeasurementLogProps) {
                 }
             });
 
+            console.log('Measurements saved successfully!');
+            alert('Medidas salvas com sucesso!');
+
             setFormData(INITIAL_DATA);
             setIsCollapsed(true); // Auto collapse after save
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error saving measurements:', error);
+            alert(`Erro ao salvar medidas: ${error.message || 'Erro desconhecido'}. Verifique o console.`);
         } finally {
             setIsSubmitting(false);
         }
