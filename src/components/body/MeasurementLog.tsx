@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Ruler, Activity, Scale, ArrowDown, ArrowUp, Minus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Ruler, Activity, Scale, ArrowDown, ArrowUp, Minus, ChevronDown, ChevronUp, Edit2, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useTrackerStore, TrackerEntry } from '../../stores/trackerStore';
 import { format } from 'date-fns';
@@ -46,10 +46,46 @@ const INITIAL_DATA: MeasurementData = {
 
 export function MeasurementLog({ measurements }: MeasurementLogProps) {
     const { user } = useAuthStore();
-    const { createTracker } = useTrackerStore();
+    const { createTracker, updateTracker, deleteTracker } = useTrackerStore();
     const [unitSystem, setUnitSystem] = useState<UnitSystem>('metric');
     const [formData, setFormData] = useState<MeasurementData>(INITIAL_DATA);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
+
+    const handleEdit = (entry: TrackerEntry) => {
+        // Populate form with entry data
+        const data = { ...INITIAL_DATA };
+
+        // Map entry values to form data, ensuring strings
+        Object.keys(INITIAL_DATA).forEach(key => {
+            if (entry.value[key] !== undefined) {
+                (data as any)[key] = entry.value[key].toString();
+            }
+        });
+
+        setFormData(data);
+        setEditingId(entry.id);
+        setIsCollapsed(false);
+
+        // Scroll to form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleDelete = async (id: string) => {
+        if (confirm('Tem certeza que deseja excluir este registro?')) {
+            try {
+                await deleteTracker(id);
+                // If we were editing this item, reset form
+                if (editingId === id) {
+                    setEditingId(null);
+                    setFormData(INITIAL_DATA);
+                }
+            } catch (error) {
+                console.error('Error deleting measurement:', error);
+                alert('Erro ao excluir registro.');
+            }
+        }
+    };
 
     // Get latest measurement for delta calculation
     const latestMeasurement = measurements.sort((a, b) =>
@@ -146,18 +182,26 @@ export function MeasurementLog({ measurements }: MeasurementLogProps) {
 
             console.log('Numeric data:', numericData);
 
-            await createTracker({
+            const payload = {
                 userId: user.id,
-                type: 'body_measurement',
-                date: format(new Date(), 'yyyy-MM-dd'),
+                type: 'body_measurement' as const,
+                date: editingId ? measurements.find(m => m.id === editingId)?.date || format(new Date(), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
                 value: {
                     ...numericData,
                     unit: unitSystem
                 }
-            });
+            };
 
-            console.log('Measurements saved successfully!');
-            alert('Medidas salvas com sucesso!');
+            if (editingId) {
+                await updateTracker(editingId, payload);
+                console.log('Measurements updated successfully!');
+                alert('Medidas atualizadas com sucesso!');
+                setEditingId(null);
+            } else {
+                await createTracker(payload);
+                console.log('Measurements saved successfully!');
+                alert('Medidas salvas com sucesso!');
+            }
 
             setFormData(INITIAL_DATA);
             setIsCollapsed(true); // Auto collapse after save
@@ -167,6 +211,12 @@ export function MeasurementLog({ measurements }: MeasurementLogProps) {
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    const handleCancelEdit = () => {
+        setEditingId(null);
+        setFormData(INITIAL_DATA);
+        setIsCollapsed(true);
     };
 
     const renderInput = (label: string, field: keyof MeasurementData, icon?: React.ReactNode) => {
@@ -208,7 +258,7 @@ export function MeasurementLog({ measurements }: MeasurementLogProps) {
 
     return (
         <div className="bg-dark-850 rounded-2xl border border-white/10 overflow-hidden">
-            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+            <div className="p-4 sm:p-6 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-indigo-500/10 rounded-lg">
                         <Ruler className="h-5 w-5 text-indigo-400" />
@@ -219,18 +269,18 @@ export function MeasurementLog({ measurements }: MeasurementLogProps) {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <div className="flex bg-dark-900 rounded-lg p-1 border border-white/5">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <div className="flex bg-dark-900 rounded-lg p-1 border border-white/5 flex-1 sm:flex-none">
                         <button
                             onClick={() => setUnitSystem('metric')}
-                            className={`px-3 py-1 rounded text-xs font-medium transition-all ${unitSystem === 'metric' ? 'bg-dark-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'
+                            className={`flex-1 sm:flex-none px-3 py-1 rounded text-xs font-medium transition-all ${unitSystem === 'metric' ? 'bg-dark-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'
                                 }`}
                         >
                             Métrico
                         </button>
                         <button
                             onClick={() => setUnitSystem('imperial')}
-                            className={`px-3 py-1 rounded text-xs font-medium transition-all ${unitSystem === 'imperial' ? 'bg-dark-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'
+                            className={`flex-1 sm:flex-none px-3 py-1 rounded text-xs font-medium transition-all ${unitSystem === 'imperial' ? 'bg-dark-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'
                                 }`}
                         >
                             Imperial
@@ -315,8 +365,19 @@ export function MeasurementLog({ measurements }: MeasurementLogProps) {
                         disabled={isSubmitting}
                         className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                     >
-                        {isSubmitting ? 'Salvando...' : 'Salvar Medidas'}
+                        {isSubmitting ? 'Salvando...' : editingId ? 'Atualizar Medidas' : 'Salvar Medidas'}
                     </button>
+
+                    {editingId && (
+                        <button
+                            type="button"
+                            onClick={handleCancelEdit}
+                            disabled={isSubmitting}
+                            className="w-full bg-dark-800 hover:bg-dark-700 text-zinc-300 font-medium py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                        >
+                            Cancelar Edição
+                        </button>
+                    )}
                 </form>
             )}
 
@@ -335,25 +396,43 @@ export function MeasurementLog({ measurements }: MeasurementLogProps) {
                                             {format(new Date(entry.date), 'dd/MM/yyyy')}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-4 text-zinc-300">
-                                        {entry.value.weight && (
-                                            <span className="flex items-center gap-1">
-                                                <Scale className="h-3 w-3 text-zinc-500" />
-                                                {entry.value.weight}kg
-                                            </span>
-                                        )}
-                                        {entry.value.bodyFat && (
-                                            <span className="flex items-center gap-1">
-                                                <Activity className="h-3 w-3 text-zinc-500" />
-                                                {entry.value.bodyFat}%
-                                            </span>
-                                        )}
-                                        {entry.value.waist && (
-                                            <span className="flex items-center gap-1">
-                                                <Ruler className="h-3 w-3 text-zinc-500" />
-                                                {entry.value.waist}cm
-                                            </span>
-                                        )}
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-4 text-zinc-300">
+                                            {entry.value.weight && (
+                                                <span className="flex items-center gap-1">
+                                                    <Scale className="h-3 w-3 text-zinc-500" />
+                                                    {entry.value.weight}kg
+                                                </span>
+                                            )}
+                                            {entry.value.bodyFat && (
+                                                <span className="flex items-center gap-1">
+                                                    <Activity className="h-3 w-3 text-zinc-500" />
+                                                    {entry.value.bodyFat}%
+                                                </span>
+                                            )}
+                                            {entry.value.waist && (
+                                                <span className="flex items-center gap-1">
+                                                    <Ruler className="h-3 w-3 text-zinc-500" />
+                                                    {entry.value.waist}cm
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-1 pl-2 border-l border-white/10">
+                                            <button
+                                                onClick={() => handleEdit(entry)}
+                                                className="p-1.5 text-zinc-500 hover:text-white hover:bg-white/5 rounded transition-colors"
+                                                title="Editar"
+                                            >
+                                                <Edit2 className="h-3.5 w-3.5" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(entry.id)}
+                                                className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                                                title="Excluir"
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}

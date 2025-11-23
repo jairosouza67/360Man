@@ -138,15 +138,15 @@ export function WeeklyProgress({ trackers }: WeeklyProgressProps) {
 
     return (
         <div className="bg-dark-850 rounded-2xl border border-white/10 overflow-hidden">
-            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+            <div className="p-4 sm:p-6 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 className="text-lg font-semibold text-white">Progress Tracker</h2>
                     <p className="text-sm text-zinc-400">Acompanhamento semanal</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full sm:w-auto">
                     <button
                         onClick={() => setShowAllWeeks(!showAllWeeks)}
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-dark-900 text-zinc-400 hover:text-white border border-white/5 transition-colors"
+                        className="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-medium bg-dark-900 text-zinc-400 hover:text-white border border-white/5 transition-colors"
                     >
                         {showAllWeeks ? 'Ver Recentes' : 'Ver Todos'}
                     </button>
@@ -190,7 +190,7 @@ export function WeeklyProgress({ trackers }: WeeklyProgressProps) {
                 </div>
             )}
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto max-w-full">
                 <table className="w-full text-sm text-left">
                     <thead className="text-xs text-zinc-400 uppercase bg-dark-900/50">
                         <tr>

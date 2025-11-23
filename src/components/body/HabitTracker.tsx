@@ -152,7 +152,7 @@ export function HabitTracker({ habits, logs }: HabitTrackerProps) {
         }
 
         return (
-            <div className="flex gap-1 overflow-x-auto pb-2 custom-scrollbar">
+            <div className="flex gap-1 overflow-x-auto pb-2 custom-scrollbar max-w-full">
                 {weeks.map((week, wIndex) => (
                     <div key={wIndex} className="flex flex-col gap-1">
                         {week.map((day, dIndex) => {
